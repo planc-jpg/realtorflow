@@ -3,9 +3,8 @@ import DashboardLayout from './layouts/DashboardLayout';
 import Dashboard from './pages/Dashboard';
 import Properties from './pages/Properties';
 import Clients from './pages/Clients';
+import Leads from './pages/Leads';
 
-
-function Leads()       { return <h2 className="text-xl font-semibold">Leads</h2>;       }
 function Appointments(){ return <h2 className="text-xl font-semibold">Appointments</h2>; }
 
 export default function App() {
