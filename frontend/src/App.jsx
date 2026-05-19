@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard';
 import Properties from './pages/Properties';
 import Clients from './pages/Clients';
 import Leads from './pages/Leads';
+import AIListing from './pages/AIListing';
 
 function Appointments(){ return <h2 className="text-xl font-semibold">Appointments</h2>; }
 
@@ -17,6 +18,7 @@ export default function App() {
           <Route path="/clients"      element={<Clients />}       />
           <Route path="/leads"        element={<Leads />}         />
           <Route path="/appointments" element={<Appointments />}  />
+          <Route path="/ai-listing" element={<AIListing />} />
         </Routes>
       </DashboardLayout>
     </BrowserRouter>
