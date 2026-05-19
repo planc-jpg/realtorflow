@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { Mail, Phone, X, Trash2 } from 'lucide-react';
+import ConfirmModal from '../components/ConfirmModal';
 
 const statusStyles = {
   Active:   'bg-green-100 text-green-700',
@@ -36,6 +37,7 @@ export default function Clients() {
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [confirmId, setConfirmId] = useState(null);
 
   useEffect(() => { fetchClients(); }, []);
 
@@ -62,11 +64,11 @@ export default function Clients() {
     setSaving(false);
   }
 
-  async function handleDelete(id) {
-    if (!confirm('Delete this client?')) return;
-    const { error } = await supabase.from('clients').delete().eq('id', id);
+  async function handleDelete() {
+    const { error } = await supabase.from('clients').delete().eq('id', confirmId);
     if (error) alert('Error: ' + error.message);
     else fetchClients();
+    setConfirmId(null);
   }
 
   if (loading) return <p className="text-sm text-gray-500">Loading clients...</p>;
@@ -106,7 +108,7 @@ export default function Clients() {
                   <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusStyles[client.status]}`}>
                     {client.status}
                   </span>
-                  <button onClick={() => handleDelete(client.id)} className="text-gray-300 hover:text-red-500 transition-colors">
+                  <button onClick={() => setConfirmId(client.id)} className="text-gray-300 hover:text-red-500 transition-colors">
                     <Trash2 size={15} />
                   </button>
                 </div>
@@ -165,6 +167,14 @@ export default function Clients() {
             </div>
           </div>
         </div>
+      )}
+
+      {confirmId && (
+        <ConfirmModal
+          message="This client will be permanently deleted."
+          onConfirm={handleDelete}
+          onCancel={() => setConfirmId(null)}
+        />
       )}
     </div>
   );
