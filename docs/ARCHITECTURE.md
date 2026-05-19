@@ -6,15 +6,18 @@
 - Tailwind CSS
 
 ## Backend
-- Node.js
-- Express
+- Supabase (PostgreSQL)
+- Node.js / Express (planned)
 
-## Database
-- Supabase PostgreSQL
+## Database Tables
+- properties
+- clients
+- leads
+- appointments
 
 ## AI
-- Claude/OpenAI API
+- Anthropic Claude API (mock for now)
 
 ## Deployment
-- Vercel
-- Railway or Render
+- Vercel (planned)
+- Railway or Render (planned)
