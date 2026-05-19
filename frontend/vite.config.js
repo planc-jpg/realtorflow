@@ -7,4 +7,12 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  optimizeDeps: {
+    include: ['@supabase/supabase-js'],
+  },
+  build: {
+    rollupOptions: {
+      external: [],
+    },
+  },
 })
