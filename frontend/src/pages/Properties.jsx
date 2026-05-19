@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Home, MapPin } from 'lucide-react';
+import { Home, X } from 'lucide-react';
 
 const statusStyles = {
   active:  'bg-green-100 text-green-700',
@@ -10,37 +10,75 @@ const statusStyles = {
   sold:    'bg-gray-100 text-gray-500',
 };
 
+const emptyForm = {
+  address: '',
+  price: '',
+  beds: '',
+  baths: '',
+  sqft: '',
+  status: 'active',
+  description: '',
+};
+
 export default function Properties() {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState(emptyForm);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    async function fetchProperties() {
-      const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        setError(error.message);
-      } else {
-        setProperties(data);
-      }
-
-      setLoading(false);
-    }
-
     fetchProperties();
   }, []);
 
-  if (loading) {
-    return <p className="text-sm text-gray-500">Loading properties...</p>;
+  async function fetchProperties() {
+    const { data, error } = await supabase
+      .from('properties')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      setError(error.message);
+    } else {
+      setProperties(data);
+    }
+    setLoading(false);
   }
 
-  if (error) {
-    return <p className="text-sm text-red-500">Error: {error}</p>;
+  function handleChange(e) {
+    setForm({ ...form, [e.target.name]: e.target.value });
   }
+
+  async function handleSave() {
+    if (!form.address) return;
+    setSaving(true);
+
+    const { error } = await supabase.from('properties').insert([
+      {
+        address: form.address,
+        price: form.price ? parseInt(form.price) : null,
+        beds: form.beds ? parseInt(form.beds) : null,
+        baths: form.baths ? parseInt(form.baths) : null,
+        sqft: form.sqft ? parseInt(form.sqft) : null,
+        status: form.status,
+        description: form.description || null,
+      },
+    ]);
+
+    if (error) {
+      alert('Error saving property: ' + error.message);
+    } else {
+      setShowModal(false);
+      setForm(emptyForm);
+      fetchProperties();
+    }
+
+    setSaving(false);
+  }
+
+  if (loading) return <p className="text-sm text-gray-500">Loading properties...</p>;
+  if (error) return <p className="text-sm text-red-500">Error: {error}</p>;
 
   return (
     <div>
@@ -49,7 +87,10 @@ export default function Properties() {
           <h2 className="text-xl font-semibold text-gray-900">Properties</h2>
           <p className="text-sm text-gray-500 mt-0.5">{properties.length} listings</p>
         </div>
-        <button className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+        <button
+          onClick={() => setShowModal(true)}
+          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+        >
           + New Property
         </button>
       </div>
@@ -68,13 +109,10 @@ export default function Properties() {
                   {p.status}
                 </span>
               </div>
-
               <h3 className="font-medium text-gray-900 mb-1">{p.address}</h3>
-
               <p className="text-lg font-semibold text-gray-900 mb-3">
                 ${p.price?.toLocaleString()}
               </p>
-
               <div className="flex items-center gap-4 text-sm text-gray-500 border-t border-gray-100 pt-3">
                 <span>{p.beds} beds</span>
                 <span>{p.baths} baths</span>
@@ -82,6 +120,119 @@ export default function Properties() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-lg mx-4 p-6">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-semibold text-gray-900">New Property</h3>
+              <button onClick={() => setShowModal(false)}>
+                <X size={18} className="text-gray-400 hover:text-gray-600" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Address *</label>
+                <input
+                  name="address"
+                  value={form.address}
+                  onChange={handleChange}
+                  placeholder="123 Maple Street, Austin, TX"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Price</label>
+                <input
+                  name="price"
+                  value={form.price}
+                  onChange={handleChange}
+                  placeholder="450000"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <select
+                  name="status"
+                  value={form.status}
+                  onChange={handleChange}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="active">Active</option>
+                  <option value="pending">Pending</option>
+                  <option value="sold">Sold</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Bedrooms</label>
+                <input
+                  name="beds"
+                  value={form.beds}
+                  onChange={handleChange}
+                  placeholder="3"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Bathrooms</label>
+                <input
+                  name="baths"
+                  value={form.baths}
+                  onChange={handleChange}
+                  placeholder="2"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Square Footage</label>
+                <input
+                  name="sqft"
+                  value={form.sqft}
+                  onChange={handleChange}
+                  placeholder="2100"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea
+                  name="description"
+                  value={form.description}
+                  onChange={handleChange}
+                  placeholder="Optional notes about the property..."
+                  rows={3}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-5">
+              <button
+                onClick={() => setShowModal(false)}
+                className="flex-1 border border-gray-200 text-gray-600 text-sm font-medium py-2 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={saving || !form.address}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-sm font-medium py-2 rounded-lg transition-colors"
+              >
+                {saving ? 'Saving...' : 'Save Property'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
