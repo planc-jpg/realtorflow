@@ -5,8 +5,7 @@ import Properties from './pages/Properties';
 import Clients from './pages/Clients';
 import Leads from './pages/Leads';
 import AIListing from './pages/AIListing';
-
-function Appointments(){ return <h2 className="text-xl font-semibold">Appointments</h2>; }
+import Appointments from './pages/Appointments';
 
 export default function App() {
   return (
