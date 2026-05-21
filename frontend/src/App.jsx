@@ -1,4 +1,8 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './auth/AuthProvider';
+import { useAuth } from './auth/useAuth';
+import ProtectedRoute from './auth/ProtectedRoute';
+import PublicRoute from './auth/PublicRoute';
 import DashboardLayout from './layouts/DashboardLayout';
 import Dashboard from './pages/Dashboard';
 import Properties from './pages/Properties';
@@ -6,20 +10,60 @@ import Clients from './pages/Clients';
 import Leads from './pages/Leads';
 import AIListing from './pages/AIListing';
 import Appointments from './pages/Appointments';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import AcceptInvite from './pages/AcceptInvite';
+import NoTeam from './pages/NoTeam';
+
+function TeamGate({ children }) {
+  const { teams, activeTeamId, loading } = useAuth();
+  if (loading) return null;
+  if (teams.length === 0 || !activeTeamId) {
+    return <Navigate to="/welcome" replace />;
+  }
+  return children;
+}
 
 export default function App() {
   return (
     <BrowserRouter>
-      <DashboardLayout>
+      <AuthProvider>
         <Routes>
-          <Route path="/"             element={<Dashboard />}     />
-          <Route path="/properties"   element={<Properties />}    />
-          <Route path="/clients"      element={<Clients />}       />
-          <Route path="/leads"        element={<Leads />}         />
-          <Route path="/appointments" element={<Appointments />}  />
-          <Route path="/ai-listing" element={<AIListing />} />
+          <Route
+            path="/login"
+            element={<PublicRoute><Login /></PublicRoute>}
+          />
+          <Route
+            path="/signup"
+            element={<PublicRoute><Signup /></PublicRoute>}
+          />
+          <Route path="/accept-invite" element={<AcceptInvite />} />
+          <Route
+            path="/welcome"
+            element={<ProtectedRoute><NoTeam /></ProtectedRoute>}
+          />
+
+          <Route
+            path="/*"
+            element={
+              <ProtectedRoute>
+                <TeamGate>
+                  <DashboardLayout>
+                    <Routes>
+                      <Route path="/"             element={<Dashboard />}    />
+                      <Route path="/properties"   element={<Properties />}   />
+                      <Route path="/clients"      element={<Clients />}      />
+                      <Route path="/leads"        element={<Leads />}        />
+                      <Route path="/appointments" element={<Appointments />} />
+                      <Route path="/ai-listing"   element={<AIListing />}    />
+                    </Routes>
+                  </DashboardLayout>
+                </TeamGate>
+              </ProtectedRoute>
+            }
+          />
         </Routes>
-      </DashboardLayout>
+      </AuthProvider>
     </BrowserRouter>
   );
 }
