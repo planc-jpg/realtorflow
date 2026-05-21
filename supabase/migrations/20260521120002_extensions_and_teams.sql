@@ -51,7 +51,7 @@ create table public.team_invites (
   team_id     uuid not null references public.teams(id) on delete cascade,
   email       citext not null,
   role        public.team_role not null default 'member',
-  token       text unique not null default encode(gen_random_bytes(24), 'base64'),
+  token       text unique not null default encode(extensions.gen_random_bytes(24), 'base64'),
   invited_by  uuid not null references auth.users(id) on delete set null default auth.uid(),
   expires_at  timestamptz not null default (now() + interval '7 days'),
   accepted_at timestamptz,
