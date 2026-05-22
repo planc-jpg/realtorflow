@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../auth/useAuth';
 import { Mail, Phone, Home, X, Trash2 } from 'lucide-react';
 
 const statusStyles = {
@@ -14,6 +15,7 @@ const columns = ['New', 'Contacted', 'Closed'];
 const emptyForm = { name: '', email: '', phone: '', property: '', status: 'New' };
 
 export default function Leads() {
+  const { activeTeamId } = useAuth();
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -21,12 +23,14 @@ export default function Leads() {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { fetchLeads(); }, []);
+  useEffect(() => { fetchLeads(); }, [activeTeamId]);
 
   async function fetchLeads() {
+    if (!activeTeamId) return;
     const { data, error } = await supabase
       .from('leads')
       .select('*')
+      .eq('team_id', activeTeamId)
       .order('created_at', { ascending: false });
     if (error) setError(error.message);
     else setLeads(data);
@@ -38,9 +42,9 @@ export default function Leads() {
   }
 
   async function handleSave() {
-    if (!form.name) return;
+    if (!form.name || !activeTeamId) return;
     setSaving(true);
-    const { error } = await supabase.from('leads').insert([form]);
+    const { error } = await supabase.from('leads').insert([{ ...form, team_id: activeTeamId }]);
     if (error) alert('Error: ' + error.message);
     else { setShowModal(false); setForm(emptyForm); fetchLeads(); }
     setSaving(false);

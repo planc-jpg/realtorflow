@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../auth/useAuth';
 import { MapPin, User, X, Trash2 } from 'lucide-react';
 
 const typeStyles = {
@@ -14,6 +15,7 @@ const typeStyles = {
 const emptyForm = { title: '', client: '', property: '', date: '', time: '', type: 'Showing' };
 
 export default function Appointments() {
+  const { activeTeamId } = useAuth();
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -21,12 +23,14 @@ export default function Appointments() {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { fetchAppointments(); }, []);
+  useEffect(() => { fetchAppointments(); }, [activeTeamId]);
 
   async function fetchAppointments() {
+    if (!activeTeamId) return;
     const { data, error } = await supabase
       .from('appointments')
       .select('*')
+      .eq('team_id', activeTeamId)
       .order('date', { ascending: true });
     if (error) setError(error.message);
     else setAppointments(data);
@@ -38,9 +42,9 @@ export default function Appointments() {
   }
 
   async function handleSave() {
-    if (!form.title) return;
+    if (!form.title || !activeTeamId) return;
     setSaving(true);
-    const { error } = await supabase.from('appointments').insert([form]);
+    const { error } = await supabase.from('appointments').insert([{ ...form, team_id: activeTeamId }]);
     if (error) alert('Error: ' + error.message);
     else { setShowModal(false); setForm(emptyForm); fetchAppointments(); }
     setSaving(false);

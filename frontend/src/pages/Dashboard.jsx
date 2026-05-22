@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../auth/useAuth';
 import { Home, Users, UserPlus, CalendarDays } from 'lucide-react';
 import StatCard from '../components/StatCard';
 
 export default function Dashboard() {
+  const { activeTeamId } = useAuth();
   const [counts, setCounts] = useState({
     properties: 0,
     clients: 0,
@@ -16,11 +18,12 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function fetchCounts() {
+      if (!activeTeamId) return;
       const [properties, clients, leads, appointments] = await Promise.all([
-        supabase.from('properties').select('id', { count: 'exact', head: true }),
-        supabase.from('clients').select('id', { count: 'exact', head: true }),
-        supabase.from('leads').select('id', { count: 'exact', head: true }),
-        supabase.from('appointments').select('id', { count: 'exact', head: true }),
+        supabase.from('properties').select('id', { count: 'exact', head: true }).eq('team_id', activeTeamId),
+        supabase.from('clients').select('id', { count: 'exact', head: true }).eq('team_id', activeTeamId),
+        supabase.from('leads').select('id', { count: 'exact', head: true }).eq('team_id', activeTeamId),
+        supabase.from('appointments').select('id', { count: 'exact', head: true }).eq('team_id', activeTeamId),
       ]);
 
       setCounts({
@@ -33,7 +36,7 @@ export default function Dashboard() {
     }
 
     fetchCounts();
-  }, []);
+  }, [activeTeamId]);
 
   const stats = [
     { label: 'Properties',   value: counts.properties,   icon: Home,         color: 'blue'   },

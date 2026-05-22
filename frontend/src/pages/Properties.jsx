@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../auth/useAuth';
 import { Home, X, Trash2 } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 
@@ -22,6 +23,7 @@ const emptyForm = {
 };
 
 export default function Properties() {
+  const { activeTeamId } = useAuth();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -32,12 +34,14 @@ export default function Properties() {
 
   useEffect(() => {
     fetchProperties();
-  }, []);
+  }, [activeTeamId]);
 
   async function fetchProperties() {
+    if (!activeTeamId) return;
     const { data, error } = await supabase
       .from('properties')
       .select('*')
+      .eq('team_id', activeTeamId)
       .order('created_at', { ascending: false });
     if (error) setError(error.message);
     else setProperties(data);
@@ -49,7 +53,7 @@ export default function Properties() {
   }
 
   async function handleSave() {
-    if (!form.address) return;
+    if (!form.address || !activeTeamId) return;
     setSaving(true);
     const { error } = await supabase.from('properties').insert([
       {
@@ -60,6 +64,7 @@ export default function Properties() {
         sqft: form.sqft ? parseInt(form.sqft) : null,
         status: form.status,
         description: form.description || null,
+        team_id: activeTeamId,
       },
     ]);
     if (error) alert('Error saving property: ' + error.message);

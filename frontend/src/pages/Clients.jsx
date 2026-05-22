@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../auth/useAuth';
 import { Mail, Phone, X, Trash2 } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 
@@ -31,6 +32,7 @@ function getInitials(name) {
 }
 
 export default function Clients() {
+  const { activeTeamId } = useAuth();
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -39,12 +41,14 @@ export default function Clients() {
   const [saving, setSaving] = useState(false);
   const [confirmId, setConfirmId] = useState(null);
 
-  useEffect(() => { fetchClients(); }, []);
+  useEffect(() => { fetchClients(); }, [activeTeamId]);
 
   async function fetchClients() {
+    if (!activeTeamId) return;
     const { data, error } = await supabase
       .from('clients')
       .select('*')
+      .eq('team_id', activeTeamId)
       .order('created_at', { ascending: false });
     if (error) setError(error.message);
     else setClients(data);
@@ -56,9 +60,9 @@ export default function Clients() {
   }
 
   async function handleSave() {
-    if (!form.name) return;
+    if (!form.name || !activeTeamId) return;
     setSaving(true);
-    const { error } = await supabase.from('clients').insert([form]);
+    const { error } = await supabase.from('clients').insert([{ ...form, team_id: activeTeamId }]);
     if (error) alert('Error: ' + error.message);
     else { setShowModal(false); setForm(emptyForm); fetchClients(); }
     setSaving(false);
