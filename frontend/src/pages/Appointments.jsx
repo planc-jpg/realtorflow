@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../auth/useAuth';
 import { MapPin, User, X, Trash2 } from 'lucide-react';
+import ConfirmModal from '../components/ConfirmModal';
 
 const typeStyles = {
   Showing:      'bg-blue-100 text-blue-700',
@@ -22,6 +23,7 @@ export default function Appointments() {
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [confirmId, setConfirmId] = useState(null);
 
   useEffect(() => { fetchAppointments(); }, [activeTeamId]);
 
@@ -50,11 +52,11 @@ export default function Appointments() {
     setSaving(false);
   }
 
-  async function handleDelete(id) {
-    if (!confirm('Delete this appointment?')) return;
-    const { error } = await supabase.from('appointments').delete().eq('id', id);
+  async function handleDelete() {
+    const { error } = await supabase.from('appointments').delete().eq('id', confirmId);
     if (error) alert('Error: ' + error.message);
     else fetchAppointments();
+    setConfirmId(null);
   }
 
   const days = [...new Set(appointments.map((a) => a.date))];
@@ -102,7 +104,7 @@ export default function Appointments() {
                           {appt.property && <span className="flex items-center gap-1"><MapPin size={11} />{appt.property}</span>}
                         </div>
                       </div>
-                      <button onClick={() => handleDelete(appt.id)} className="text-gray-300 hover:text-red-500 transition-colors flex-shrink-0">
+                      <button onClick={() => setConfirmId(appt.id)} className="text-gray-300 hover:text-red-500 transition-colors flex-shrink-0">
                         <Trash2 size={15} />
                       </button>
                     </div>
@@ -161,6 +163,14 @@ export default function Appointments() {
             </div>
           </div>
         </div>
+      )}
+
+      {confirmId && (
+        <ConfirmModal
+          message="This appointment will be permanently deleted."
+          onConfirm={handleDelete}
+          onCancel={() => setConfirmId(null)}
+        />
       )}
     </div>
   );

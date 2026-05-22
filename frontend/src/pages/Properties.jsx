@@ -19,7 +19,6 @@ const emptyForm = {
   baths: '',
   sqft: '',
   status: 'active',
-  description: '',
 };
 
 export default function Properties() {
@@ -63,7 +62,6 @@ export default function Properties() {
         baths: form.baths ? parseInt(form.baths) : null,
         sqft: form.sqft ? parseInt(form.sqft) : null,
         status: form.status,
-        description: form.description || null,
         team_id: activeTeamId,
       },
     ]);
@@ -167,10 +165,6 @@ export default function Properties() {
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Square Footage</label>
                 <input name="sqft" value={form.sqft} onChange={handleChange} placeholder="2100" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-              </div>
-              <div className="col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea name="description" value={form.description} onChange={handleChange} placeholder="Optional notes about the property..." rows={3} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" />
               </div>
             </div>
             <div className="flex gap-3 mt-5">
