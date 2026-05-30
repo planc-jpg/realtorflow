@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Mail, Shield, UserRound, X } from 'lucide-react';
+import { Mail, Shield, Trash2, UserRound, X } from 'lucide-react';
 import { useAuth } from '../auth/useAuth';
 import { supabase } from '../lib/supabase';
+import ConfirmModal from '../components/ConfirmModal';
 
 const roleStyles = {
   owner: 'bg-blue-100 text-blue-700',
@@ -29,6 +30,11 @@ export default function Team() {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [inviteUrl, setInviteUrl] = useState('');
+  const [confirmUserId, setConfirmUserId] = useState(null);
+  const [updatingUserId, setUpdatingUserId] = useState(null);
+
+  const currentMember = members.find((member) => member.user_id === user?.id);
+  const canManageMembers = currentMember?.role === 'owner' || currentMember?.role === 'admin';
 
   const fetchMembers = useCallback(async () => {
     if (!activeTeamId) return;
@@ -111,6 +117,37 @@ export default function Team() {
     setSaving(false);
   }
 
+  async function handleRoleChange(memberId, role) {
+    if (!activeTeamId) return;
+    setUpdatingUserId(memberId);
+    setError(null);
+
+    const { error } = await supabase
+      .from('team_members')
+      .update({ role })
+      .eq('team_id', activeTeamId)
+      .eq('user_id', memberId);
+
+    if (error) setError(error.message);
+    else await fetchMembers();
+    setUpdatingUserId(null);
+  }
+
+  async function handleRemoveMember() {
+    if (!activeTeamId || !confirmUserId) return;
+    setError(null);
+
+    const { error } = await supabase
+      .from('team_members')
+      .delete()
+      .eq('team_id', activeTeamId)
+      .eq('user_id', confirmUserId);
+
+    if (error) setError(error.message);
+    else await fetchMembers();
+    setConfirmUserId(null);
+  }
+
   if (loading) return <p className="text-sm text-gray-500">Loading team...</p>;
 
   return (
@@ -137,6 +174,7 @@ export default function Team() {
       <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
         {members.map((member) => {
           const name = member.profile?.full_name || (member.user_id === user?.id ? user.email : member.user_id);
+          const isCurrentUser = member.user_id === user?.id;
           return (
             <div key={member.user_id} className="flex items-center justify-between gap-4 p-4">
               <div className="flex items-center gap-3 min-w-0">
@@ -148,9 +186,33 @@ export default function Team() {
                   <p className="text-xs text-gray-500">Joined {formatDate(member.joined_at)}</p>
                 </div>
               </div>
-              <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${roleStyles[member.role] ?? roleStyles.member}`}>
-                {member.role}
-              </span>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {canManageMembers ? (
+                  <select
+                    value={member.role}
+                    onChange={(e) => handleRoleChange(member.user_id, e.target.value)}
+                    disabled={isCurrentUser || updatingUserId === member.user_id}
+                    className="rounded-lg border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-700 disabled:bg-gray-50 disabled:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="member">member</option>
+                    <option value="admin">admin</option>
+                    <option value="owner">owner</option>
+                  </select>
+                ) : (
+                  <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${roleStyles[member.role] ?? roleStyles.member}`}>
+                    {member.role}
+                  </span>
+                )}
+                {canManageMembers && !isCurrentUser && (
+                  <button
+                    onClick={() => setConfirmUserId(member.user_id)}
+                    className="text-gray-300 hover:text-red-500 transition-colors"
+                    aria-label={`Remove ${name}`}
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                )}
+              </div>
             </div>
           );
         })}
@@ -226,6 +288,14 @@ export default function Team() {
             </form>
           </div>
         </div>
+      )}
+
+      {confirmUserId && (
+        <ConfirmModal
+          message="This member will be removed from the team."
+          onConfirm={handleRemoveMember}
+          onCancel={() => setConfirmUserId(null)}
+        />
       )}
     </div>
   );
