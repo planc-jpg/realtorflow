@@ -10,6 +10,7 @@ import Clients from './pages/Clients';
 import Leads from './pages/Leads';
 import AIListing from './pages/AIListing';
 import Appointments from './pages/Appointments';
+import Team from './pages/Team';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import AcceptInvite from './pages/AcceptInvite';
@@ -56,6 +57,7 @@ export default function App() {
                       <Route path="/leads"        element={<Leads />}        />
                       <Route path="/appointments" element={<Appointments />} />
                       <Route path="/ai-listing"   element={<AIListing />}    />
+                      <Route path="/team"         element={<Team />}         />
                     </Routes>
                   </DashboardLayout>
                 </TeamGate>

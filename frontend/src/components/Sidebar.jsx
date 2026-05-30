@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Home, Users, UserPlus, CalendarDays, Sparkles, LogOut } from 'lucide-react';
+import { LayoutDashboard, Home, Users, UserPlus, CalendarDays, Sparkles, Settings, LogOut } from 'lucide-react';
 import { useAuth } from '../auth/useAuth';
 
 const navItems = [
@@ -9,6 +9,7 @@ const navItems = [
   { label: 'Leads',        icon: UserPlus,        to: '/leads' },
   { label: 'Appointments', icon: CalendarDays,    to: '/appointments' },
   { label: 'AI Listing',   icon: Sparkles,        to: '/ai-listing' },
+  { label: 'Team',         icon: Settings,        to: '/team' },
 ];
 
 export default function Sidebar() {
