@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../auth/useAuth';
-import { PENDING_INVITE_KEY } from '../auth/AuthProvider';
+import { PENDING_INVITE_KEY } from '../auth/constants';
 
 export default function AcceptInvite() {
   const { session, acceptInvite, loading } = useAuth();

@@ -1,9 +1,6 @@
-import { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { AuthContext } from './AuthContext';
 import { supabase } from '../lib/supabase';
-
-export const AuthContext = createContext(null);
-
-const PENDING_INVITE_KEY = 'rf.pendingInviteToken';
 
 export function AuthProvider({ children }) {
   const [session, setSession]           = useState(null);
@@ -164,5 +161,3 @@ export function AuthProvider({ children }) {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
-
-export { PENDING_INVITE_KEY };

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/useAuth';
-import { PENDING_INVITE_KEY } from '../auth/AuthProvider';
+import { PENDING_INVITE_KEY } from '../auth/constants';
 
 export default function Login() {
   const { signIn } = useAuth();
