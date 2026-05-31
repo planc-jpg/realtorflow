@@ -6,6 +6,7 @@ import { useAuth } from '../auth/useAuth';
 import { Mail, Phone, Pencil, Trash2 } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 
@@ -133,15 +134,15 @@ export default function Clients() {
                   </div>
                   <div>
                     <p className="font-medium text-gray-900">{client.name}</p>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${typeStyles[client.type]}`}>
+                    <Badge variant="outline" className={typeStyles[client.type]}>
                       {client.type}
-                    </span>
+                    </Badge>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusStyles[client.status]}`}>
+                  <Badge variant="outline" className={statusStyles[client.status]}>
                     {client.status}
-                  </span>
+                  </Badge>
                   <Button variant="ghost" size="icon" onClick={() => openEditModal(client)} className="text-gray-300 hover:text-blue-600">
                     <Pencil size={15} />
                   </Button>

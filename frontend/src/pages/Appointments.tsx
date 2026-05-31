@@ -6,6 +6,7 @@ import { useAuth } from '../auth/useAuth';
 import { MapPin, Pencil, User, Trash2 } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 
@@ -156,9 +157,9 @@ export default function Appointments() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <p className="font-medium text-gray-900 text-sm">{appt.title}</p>
-                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${typeStyles[appt.type] || 'bg-gray-100 text-gray-500'}`}>
+                          <Badge variant="outline" className={typeStyles[appt.type] || 'bg-gray-100 text-gray-500'}>
                             {appt.type}
-                          </span>
+                          </Badge>
                         </div>
                         <div className="flex items-center gap-4 text-xs text-gray-500">
                           {appt.client?.name && <span className="flex items-center gap-1"><User size={11} />{appt.client.name}</span>}

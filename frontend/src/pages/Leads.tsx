@@ -6,6 +6,7 @@ import { useAuth } from '../auth/useAuth';
 import { Mail, Phone, Home, Pencil, Trash2 } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 
@@ -130,9 +131,9 @@ export default function Leads() {
           return (
             <div key={col} className="bg-white rounded-xl border border-gray-200 p-4">
               <div className="flex items-center justify-between mb-4">
-                <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusStyles[col]}`}>
+                <Badge variant="outline" className={statusStyles[col]}>
                   {col}
-                </span>
+                </Badge>
                 <span className="text-sm text-gray-400 font-medium">{colLeads.length}</span>
               </div>
               <div className="space-y-3">

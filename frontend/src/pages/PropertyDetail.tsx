@@ -4,6 +4,7 @@ import { ArrowLeft, CalendarDays, Home, Mail, Phone, Pencil, Trash2, User } from
 import { supabase } from '../lib/supabase';
 import ConfirmModal from '../components/ConfirmModal';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 const statusStyles = {
   active: 'bg-green-100 text-green-700',
@@ -139,9 +140,9 @@ export default function PropertyDetail() {
             </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusStyles[property.status] || 'bg-gray-100 text-gray-500'}`}>
+            <Badge variant="outline" className={statusStyles[property.status] || 'bg-gray-100 text-gray-500'}>
               {property.status}
-            </span>
+            </Badge>
             <Button
               variant="ghost"
               size="icon"
@@ -222,9 +223,9 @@ export default function PropertyDetail() {
                 <div key={lead.id} className="bg-white rounded-xl border border-gray-200 p-4">
                   <div className="flex items-center justify-between gap-3 mb-2">
                     <p className="text-sm font-medium text-gray-900">{lead.name}</p>
-                    <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-gray-100 text-gray-600">
+                    <Badge variant="outline" className="bg-gray-100 text-gray-600">
                       {lead.status}
-                    </span>
+                    </Badge>
                   </div>
                   <div className="space-y-1.5 text-xs text-gray-500">
                     {lead.email && <div className="flex items-center gap-1.5"><Mail size={12} /><span>{lead.email}</span></div>}
@@ -246,9 +247,9 @@ export default function PropertyDetail() {
                 <div key={appointment.id} className="bg-white rounded-xl border border-gray-200 p-4">
                   <div className="flex items-center justify-between gap-3 mb-2">
                     <p className="text-sm font-medium text-gray-900">{appointment.title}</p>
-                    <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-gray-100 text-gray-600">
+                    <Badge variant="outline" className="bg-gray-100 text-gray-600">
                       {appointment.type}
-                    </span>
+                    </Badge>
                   </div>
                   <div className="space-y-1.5 text-xs text-gray-500">
                     {appointment.client?.name && <div className="flex items-center gap-1.5"><User size={12} /><span>{appointment.client.name}</span></div>}

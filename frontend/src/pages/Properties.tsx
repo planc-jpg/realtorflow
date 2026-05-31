@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../auth/useAuth';
 import { Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 
@@ -100,9 +101,9 @@ export default function Properties() {
                   <Home size={18} className="text-blue-600" />
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusStyles[p.status] || 'bg-gray-100 text-gray-500'}`}>
+                  <Badge variant="outline" className={statusStyles[p.status] || 'bg-gray-100 text-gray-500'}>
                     {p.status}
-                  </span>
+                  </Badge>
                 </div>
               </div>
               <h3 className="font-medium text-gray-900 mb-1">{p.address}</h3>

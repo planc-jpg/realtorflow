@@ -4,6 +4,7 @@ import { useAuth } from '../auth/useAuth';
 import { supabase } from '../lib/supabase';
 import ConfirmModal from '../components/ConfirmModal';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 const roleStyles = {
   owner: 'bg-blue-100 text-blue-700',
@@ -199,9 +200,9 @@ export default function Team() {
                     <option value="owner">owner</option>
                   </select>
                 ) : (
-                  <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${roleStyles[member.role] ?? roleStyles.member}`}>
+                  <Badge variant="outline" className={roleStyles[member.role] ?? roleStyles.member}>
                     {member.role}
-                  </span>
+                  </Badge>
                 )}
                 {canManageMembers && !isCurrentUser && (
                   <Button
