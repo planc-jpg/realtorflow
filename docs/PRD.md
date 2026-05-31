@@ -61,6 +61,16 @@ Migrations `20260521120001` through `20260521120011`:
 - All domain pages filter by `activeTeamId` and stamp `team_id` on inserts.
 - `ConfirmModal` for destructive actions across Properties, Clients, Leads, Appointments.
 
+### Phase 1C — Migration baseline repair
+Added `20260521120000_baseline_domain_tables.sql` to establish the four domain tables as the canonical baseline. Patched `20260521120003_attach_team_ownership` to use `ADD COLUMN IF NOT EXISTS` and idempotent FK constraints. Migration chain now supports clean db reset.
+
+### Phase 2D — Team management UI
+- `/team` page: member list with roles and join dates.
+- Invite flow: `create_invite` RPC (`20260521120012`) generates a token, frontend builds the accept-invite URL and copies it to clipboard.
+- Role change: owners/admins can update any other member's role inline.
+- Remove member: owners/admins can remove members with confirmation modal.
+- Current user's own row is protected from self-demotion and self-removal.
+
 ---
 
 ## 4. System Architecture Overview
@@ -112,10 +122,10 @@ Migrations `20260521120001` through `20260521120011`:
 Every domain table carries `team_id NOT NULL` (cascades on team delete) and `created_by` (sets null on user delete):
 - `properties (address, price, beds, baths, sqft, status[active|pending|sold])`
 - `clients (name, email, phone, type[Buyer|Seller], status[Active|Inactive])`
-- `leads (name, email, phone, property, status[New|Contacted|Closed])`
-- `appointments (title, client, property, date, time, type[Showing|Consultation|Closing|Follow Up])`
+- `leads (name, email, phone, property_id -> properties, status[New|Contacted|Closed])`
+- `appointments (title, client_id -> clients, property_id -> properties, date, time, type[Showing|Consultation|Closing|Follow Up])`
 
-**Known model gaps to address in Phase 2:** `leads.property` and `appointments.client/property` are free-text strings, not FKs. This was fine for Phase 0/1 but limits joins, filtering, and AI context. Phase 2A converts them.
+**Phase 2A relational integrity status:** `leads.property_id`, `appointments.client_id`, and `appointments.property_id` now reference the relevant domain tables. The old free-text columns were removed in `20260521120014_drop_text_fk_columns.sql`.
 
 ---
 
@@ -143,12 +153,10 @@ Every domain table carries `team_id NOT NULL` (cascades on team delete) and `cre
 Phases are sized to be shippable in 1–2 weeks each. Each one adds visible user value, not just plumbing.
 
 ### Phase 2A — Relational integrity + listing detail
-The current free-text `leads.property`, `appointments.client`, and `appointments.property` columns become real FKs to `properties` and `clients`. Adds:
+Relational integrity is partially complete: `20260521120013_add_fk_columns.sql` added nullable FK columns for leads and appointments, and `20260521120014_drop_text_fk_columns.sql` removed the old free-text columns after the frontend switched to FK dropdowns. Remaining work:
 - A Property detail page (clicking a property card opens it).
 - Activity log per property (who created, last edited, status changes).
-- Inline assignment: when creating a lead or appointment, pick from a dropdown of existing properties/clients.
-
-Migration is data-preserving — text columns get matched to existing rows where possible, kept as fallback otherwise.
+- Broader cleanup around joined display/edit flows as detail pages land.
 
 ### Phase 2B — Real AI listing generator
 Replaces the `setTimeout` mock with an actual Anthropic Claude call.
@@ -165,12 +173,12 @@ Replaces the `setTimeout` mock with an actual Anthropic Claude call.
 - Image optimization: client-side resize before upload to cap storage growth.
 - _Stretch:_ AI photo enhancement (auto-crop, brightness, sky replacement) using a single external API — gated behind a feature flag.
 
-### Phase 2D — Team management UI
-The data model already supports this; the UI doesn't exist yet.
-- `/team` page: list members with role, join date, last activity.
-- Invite flow with copy-link (already supported by RPC) + email delivery (new).
-- Role changes (owner/admin/member) with confirmation.
-- Remove member (revokes via `team_members` delete; their rows stay but `created_by` goes null).
+### Phase 2D — Team management UI (complete)
+- `/team` page: member list with roles and join dates.
+- Invite flow: `create_invite` RPC (`20260521120012`) generates a token, frontend builds the accept-invite URL and copies it to clipboard.
+- Role change: owners/admins can update any other member's role inline.
+- Remove member: owners/admins can remove members with confirmation modal.
+- Current user's own row is protected from self-demotion and self-removal.
 - Team switcher in the sidebar for users on multiple teams.
 
 ### Phase 3A — Pipeline + analytics
@@ -198,15 +206,17 @@ This phase is intentionally vague until 2 + 3 land — MLS integration is a swam
 
 ## 8. Feature Priorities
 
-**P0 (next up — Phase 2A/2B):**
-1. Convert free-text `leads.property` / `appointments.client/property` to FKs.
-2. Property detail page.
-3. Real Anthropic-backed listing generator (with key on the server).
+**Done:**
+- Convert free-text `leads.property` / `appointments.client/property` to FKs.
+- Team management UI (invite, role change, remove).
+- Team switcher in sidebar.
 
-**P1 (Phase 2C/2D):**
+**P0 (next up — Phase 2A/2B):**
+1. Property detail page.
+2. Real Anthropic-backed listing generator (with key on the server).
+
+**P1 (Phase 2C):**
 4. Photo uploads tied to properties.
-5. Team management UI (invite, role change, remove).
-6. Team switcher in sidebar.
 
 **P2 (Phase 3):**
 7. Lead pipeline kanban.
@@ -305,9 +315,9 @@ These are speculative — captured here so they're not lost, not committed.
 A standalone summary view of section 7. Use this as the checklist.
 
 ## Phase 2A — Relational integrity + listing detail
-- Convert `leads.property`, `appointments.client`, `appointments.property` from text to FKs.
+- Convert `leads.property`, `appointments.client`, `appointments.property` from text to FKs. (complete)
+- Dropdown pickers for client/property in lead and appointment forms. (complete)
 - Property detail page (route, layout, activity log).
-- Dropdown pickers for client/property in lead and appointment forms.
 
 ## Phase 2B — Real AI listing generator
 - Server-side Anthropic proxy (Vercel function or Supabase Edge).
@@ -321,10 +331,12 @@ A standalone summary view of section 7. Use this as the checklist.
 - Client-side resize before upload.
 - _Stretch:_ AI photo enhancement behind a flag.
 
-## Phase 2D — Team management UI
-- `/team` page: member list, roles, last activity.
-- Invite flow with copy-link + email delivery.
-- Role change + remove member with confirmation.
+## Phase 2D — Team management UI (complete)
+- `/team` page: member list with roles and join dates.
+- Invite flow: `create_invite` RPC (`20260521120012`) generates a token, frontend builds the accept-invite URL and copies it to clipboard.
+- Role change: owners/admins can update any other member's role inline.
+- Remove member: owners/admins can remove members with confirmation modal.
+- Current user's own row is protected from self-demotion and self-removal.
 - Team switcher in the sidebar.
 
 ## Phase 3A — Pipeline + analytics
