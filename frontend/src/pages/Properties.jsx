@@ -1,9 +1,10 @@
 // src/pages/Properties.jsx
 
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../auth/useAuth';
-import { Home, X, Trash2 } from 'lucide-react';
+import { Home, X } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 
 const statusStyles = {
@@ -100,7 +101,7 @@ export default function Properties() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {properties.map((p) => (
-            <div key={p.id} className="bg-white rounded-xl border border-gray-200 p-5">
+            <Link key={p.id} to={`/properties/${p.id}`} className="block bg-white rounded-xl border border-gray-200 p-5 hover:border-blue-200 hover:shadow-sm transition">
               <div className="flex items-start justify-between mb-3">
                 <div className="p-2 bg-blue-50 rounded-lg">
                   <Home size={18} className="text-blue-600" />
@@ -109,9 +110,6 @@ export default function Properties() {
                   <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusStyles[p.status] || 'bg-gray-100 text-gray-500'}`}>
                     {p.status}
                   </span>
-                  <button onClick={() => setConfirmId(p.id)} className="text-gray-300 hover:text-red-500 transition-colors">
-                    <Trash2 size={15} />
-                  </button>
                 </div>
               </div>
               <h3 className="font-medium text-gray-900 mb-1">{p.address}</h3>
@@ -123,7 +121,7 @@ export default function Properties() {
                 <span>{p.baths} baths</span>
                 {p.sqft && <span>{p.sqft?.toLocaleString()} sqft</span>}
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}

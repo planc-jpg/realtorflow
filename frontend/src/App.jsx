@@ -6,6 +6,7 @@ import PublicRoute from './auth/PublicRoute';
 import DashboardLayout from './layouts/DashboardLayout';
 import Dashboard from './pages/Dashboard';
 import Properties from './pages/Properties';
+import PropertyDetail from './pages/PropertyDetail';
 import Clients from './pages/Clients';
 import Leads from './pages/Leads';
 import AIListing from './pages/AIListing';
@@ -53,6 +54,7 @@ export default function App() {
                     <Routes>
                       <Route path="/"             element={<Dashboard />}    />
                       <Route path="/properties"   element={<Properties />}   />
+                      <Route path="/properties/:id" element={<PropertyDetail />} />
                       <Route path="/clients"      element={<Clients />}      />
                       <Route path="/leads"        element={<Leads />}        />
                       <Route path="/appointments" element={<Appointments />} />
