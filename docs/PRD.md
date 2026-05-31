@@ -64,6 +64,14 @@ Migrations `20260521120001` through `20260521120011`:
 ### Phase 1C — Migration baseline repair
 Added `20260521120000_baseline_domain_tables.sql` to establish the four domain tables as the canonical baseline. Patched `20260521120003_attach_team_ownership` to use `ADD COLUMN IF NOT EXISTS` and idempotent FK constraints. Migration chain now supports clean db reset.
 
+### Phase 2A — Relational integrity + listing detail
+- TypeScript migration completed with the minimum compile-clean approach.
+- shadcn/ui setup completed with Button, Input, Dialog, Badge, AlertDialog, and Select components installed and migrated across all pages.
+- Property detail page added with linked leads and appointments.
+- Inline edit added on all four domain pages: Properties, Clients, Leads, and Appointments.
+- `updated_at` column and trigger added to all four domain tables.
+- FK-backed lead/property and appointment/client/property relationships completed; old free-text FK columns removed.
+
 ### Phase 2D — Team management UI
 - `/team` page: member list with roles and join dates.
 - Invite flow: `create_invite` RPC (`20260521120012`) generates a token, frontend builds the accept-invite URL and copies it to clipboard.
@@ -152,11 +160,12 @@ Every domain table carries `team_id NOT NULL` (cascades on team delete) and `cre
 
 Phases are sized to be shippable in 1–2 weeks each. Each one adds visible user value, not just plumbing.
 
-### Phase 2A — Relational integrity + listing detail
-Relational integrity is partially complete: `20260521120013_add_fk_columns.sql` added nullable FK columns for leads and appointments, and `20260521120014_drop_text_fk_columns.sql` removed the old free-text columns after the frontend switched to FK dropdowns. Remaining work:
-- A Property detail page (clicking a property card opens it).
-- Activity log per property (who created, last edited, status changes).
-- Broader cleanup around joined display/edit flows as detail pages land.
+### Phase 2A — Relational integrity + listing detail (complete)
+- `20260521120013_add_fk_columns.sql` added nullable FK columns for leads and appointments.
+- `20260521120014_drop_text_fk_columns.sql` removed the old free-text columns after the frontend switched to FK dropdowns.
+- Property detail page added with linked leads and appointments.
+- Inline edit flows added across the domain pages.
+- `updated_at` column and trigger added to all four domain tables.
 
 ### Phase 2B — Real AI listing generator
 Replaces the `setTimeout` mock with an actual Anthropic Claude call.
@@ -314,10 +323,12 @@ These are speculative — captured here so they're not lost, not committed.
 
 A standalone summary view of section 7. Use this as the checklist.
 
-## Phase 2A — Relational integrity + listing detail
+## Phase 2A — Relational integrity + listing detail (complete)
 - Convert `leads.property`, `appointments.client`, `appointments.property` from text to FKs. (complete)
 - Dropdown pickers for client/property in lead and appointment forms. (complete)
-- Property detail page (route, layout, activity log).
+- Property detail page with linked leads and appointments. (complete)
+- Inline edit on all four domain pages. (complete)
+- `updated_at` column and trigger on all four domain tables. (complete)
 
 ## Phase 2B — Real AI listing generator
 - Server-side Anthropic proxy (Vercel function or Supabase Edge).
