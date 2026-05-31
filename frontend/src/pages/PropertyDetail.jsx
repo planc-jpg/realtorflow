@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, CalendarDays, Home, Mail, Phone, Trash2, User } from 'lucide-react';
+import { ArrowLeft, CalendarDays, Home, Mail, Phone, Pencil, Trash2, User } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import ConfirmModal from '../components/ConfirmModal';
 
@@ -9,6 +9,19 @@ const statusStyles = {
   pending: 'bg-amber-100 text-amber-700',
   sold: 'bg-gray-100 text-gray-500',
 };
+
+const emptyEditForm = { address: '', price: '', beds: '', baths: '', sqft: '', status: 'active' };
+
+function formFromProperty(property) {
+  return {
+    address: property?.address ?? '',
+    price: property?.price ?? '',
+    beds: property?.beds ?? '',
+    baths: property?.baths ?? '',
+    sqft: property?.sqft ?? '',
+    status: property?.status ?? 'active',
+  };
+}
 
 export default function PropertyDetail() {
   const { id } = useParams();
@@ -19,39 +32,46 @@ export default function PropertyDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [editForm, setEditForm] = useState(emptyEditForm);
+  const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    async function fetchPropertyDetail() {
-      setLoading(true);
-      setError(null);
+  const fetchPropertyDetail = useCallback(async () => {
+    setLoading(true);
+    setError(null);
 
-      const [propertyResult, leadsResult, appointmentsResult] = await Promise.all([
-        supabase.from('properties').select('*').eq('id', id).single(),
-        supabase.from('leads').select('*').eq('property_id', id),
-        supabase
-          .from('appointments')
-          .select('*, client:clients(id, name)')
-          .eq('property_id', id)
-          .order('date'),
-      ]);
+    const [propertyResult, leadsResult, appointmentsResult] = await Promise.all([
+      supabase.from('properties').select('*').eq('id', id).single(),
+      supabase.from('leads').select('*').eq('property_id', id),
+      supabase
+        .from('appointments')
+        .select('*, client:clients(id, name)')
+        .eq('property_id', id)
+        .order('date'),
+    ]);
 
-      if (propertyResult.error) {
-        setError(propertyResult.error.message);
-      } else {
-        setProperty(propertyResult.data);
-      }
-
-      if (leadsResult.error) setError(leadsResult.error.message);
-      else setLeads(leadsResult.data ?? []);
-
-      if (appointmentsResult.error) setError(appointmentsResult.error.message);
-      else setAppointments(appointmentsResult.data ?? []);
-
-      setLoading(false);
+    if (propertyResult.error) {
+      setError(propertyResult.error.message);
+    } else {
+      setProperty(propertyResult.data);
+      setEditForm(formFromProperty(propertyResult.data));
     }
 
-    fetchPropertyDetail();
+    if (leadsResult.error) setError(leadsResult.error.message);
+    else setLeads(leadsResult.data ?? []);
+
+    if (appointmentsResult.error) setError(appointmentsResult.error.message);
+    else setAppointments(appointmentsResult.data ?? []);
+
+    setLoading(false);
   }, [id]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      fetchPropertyDetail();
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [fetchPropertyDetail]);
 
   if (loading) return <p className="text-sm text-gray-500">Loading property...</p>;
   if (error) return <p className="text-sm text-red-500">Error: {error}</p>;
@@ -62,6 +82,35 @@ export default function PropertyDetail() {
     if (error) alert('Error: ' + error.message);
     else navigate('/properties');
     setConfirmDelete(false);
+  }
+
+  function handleEditChange(e) {
+    setEditForm({ ...editForm, [e.target.name]: e.target.value });
+  }
+
+  function cancelEdit() {
+    setEditForm(formFromProperty(property));
+    setEditMode(false);
+  }
+
+  async function handleSave() {
+    setSaving(true);
+    const payload = {
+      address: editForm.address,
+      price: editForm.price === '' ? null : parseInt(editForm.price),
+      beds: editForm.beds === '' ? null : parseInt(editForm.beds),
+      baths: editForm.baths === '' ? null : parseInt(editForm.baths),
+      sqft: editForm.sqft === '' ? null : parseInt(editForm.sqft),
+      status: editForm.status,
+    };
+
+    const { error } = await supabase.from('properties').update(payload).eq('id', id);
+    if (error) alert('Error saving property: ' + error.message);
+    else {
+      setEditMode(false);
+      await fetchPropertyDetail();
+    }
+    setSaving(false);
   }
 
   return (
@@ -92,6 +141,13 @@ export default function PropertyDetail() {
               {property.status}
             </span>
             <button
+              onClick={() => setEditMode(true)}
+              className="text-gray-300 hover:text-blue-600 transition-colors"
+              aria-label="Edit property"
+            >
+              <Pencil size={16} />
+            </button>
+            <button
               onClick={() => setConfirmDelete(true)}
               className="text-gray-300 hover:text-red-500 transition-colors"
               aria-label="Delete property"
@@ -101,11 +157,52 @@ export default function PropertyDetail() {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 border-t border-gray-100 pt-4 text-sm text-gray-500">
-          <span>{property.beds ?? '-'} beds</span>
-          <span>{property.baths ?? '-'} baths</span>
-          <span>{property.sqft ? property.sqft.toLocaleString() : '-'} sqft</span>
-        </div>
+        {editMode ? (
+          <div className="border-t border-gray-100 pt-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                <input name="address" value={editForm.address} onChange={handleEditChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Price</label>
+                <input name="price" value={editForm.price} onChange={handleEditChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <select name="status" value={editForm.status} onChange={handleEditChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="active">Active</option>
+                  <option value="pending">Pending</option>
+                  <option value="sold">Sold</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Bedrooms</label>
+                <input name="beds" value={editForm.beds} onChange={handleEditChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Bathrooms</label>
+                <input name="baths" value={editForm.baths} onChange={handleEditChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Square Footage</label>
+                <input name="sqft" value={editForm.sqft} onChange={handleEditChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-5">
+              <button onClick={cancelEdit} className="flex-1 border border-gray-200 text-gray-600 text-sm font-medium py-2 rounded-lg hover:bg-gray-50 transition-colors">Cancel</button>
+              <button onClick={handleSave} disabled={saving || !editForm.address} className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-sm font-medium py-2 rounded-lg transition-colors">
+                {saving ? 'Saving...' : 'Save'}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-4 border-t border-gray-100 pt-4 text-sm text-gray-500">
+            <span>{property.beds ?? '-'} beds</span>
+            <span>{property.baths ?? '-'} baths</span>
+            <span>{property.sqft ? property.sqft.toLocaleString() : '-'} sqft</span>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
