@@ -132,9 +132,9 @@ export default function Appointments() {
           <h2 className="text-xl font-semibold text-gray-900">Appointments</h2>
           <p className="text-sm text-gray-500 mt-0.5">{appointments.length} upcoming</p>
         </div>
-        <button onClick={openCreateModal} className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+        <Button onClick={openCreateModal}>
           + New Appointment
-        </button>
+        </Button>
       </div>
 
       {appointments.length === 0 ? (
@@ -166,12 +166,12 @@ export default function Appointments() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        <button onClick={() => openEditModal(appt)} className="text-gray-300 hover:text-blue-600 transition-colors">
+                        <Button variant="ghost" size="icon" onClick={() => openEditModal(appt)} className="text-gray-300 hover:text-blue-600">
                           <Pencil size={15} />
-                        </button>
-                        <button onClick={() => setConfirmId(appt.id)} className="text-gray-300 hover:text-red-500 transition-colors">
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => setConfirmId(appt.id)} className="text-gray-300 hover:text-red-500">
                           <Trash2 size={15} />
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   ))}

@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, Home, Users, UserPlus, CalendarDays, Sparkles, Settings, LogOut } from 'lucide-react';
 import { useAuth } from '../auth/useAuth';
+import { Button } from '@/components/ui/button';
 
 const navItems = [
   { label: 'Dashboard',    icon: LayoutDashboard, to: '/' },
@@ -67,13 +68,14 @@ export default function Sidebar() {
         <p className="px-2 text-xs text-gray-500 truncate" title={user?.email ?? ''}>
           {user?.email ?? ''}
         </p>
-        <button
+        <Button
+          variant="ghost"
           onClick={signOut}
-          className="mt-2 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+          className="mt-2 w-full justify-start gap-2 text-gray-600 hover:text-gray-900"
         >
           <LogOut size={16} />
           Sign out
-        </button>
+        </Button>
       </div>
     </aside>
   );

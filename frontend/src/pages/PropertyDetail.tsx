@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, CalendarDays, Home, Mail, Phone, Pencil, Trash2, User } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import ConfirmModal from '../components/ConfirmModal';
+import { Button } from '@/components/ui/button';
 
 const statusStyles = {
   active: 'bg-green-100 text-green-700',
@@ -115,13 +116,14 @@ export default function PropertyDetail() {
 
   return (
     <div>
-      <button
+      <Button
+        variant="outline"
         onClick={() => navigate('/properties')}
-        className="mb-5 flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900"
+        className="mb-5 gap-2"
       >
         <ArrowLeft size={16} />
         Back to properties
-      </button>
+      </Button>
 
       <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
         <div className="flex items-start justify-between gap-4 mb-5">
@@ -140,20 +142,24 @@ export default function PropertyDetail() {
             <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusStyles[property.status] || 'bg-gray-100 text-gray-500'}`}>
               {property.status}
             </span>
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setEditMode(true)}
-              className="text-gray-300 hover:text-blue-600 transition-colors"
+              className="text-gray-300 hover:text-blue-600"
               aria-label="Edit property"
             >
               <Pencil size={16} />
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setConfirmDelete(true)}
-              className="text-gray-300 hover:text-red-500 transition-colors"
+              className="text-gray-300 hover:text-red-500"
               aria-label="Delete property"
             >
               <Trash2 size={16} />
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -190,10 +196,10 @@ export default function PropertyDetail() {
               </div>
             </div>
             <div className="flex gap-3 mt-5">
-              <button onClick={cancelEdit} className="flex-1 border border-gray-200 text-gray-600 text-sm font-medium py-2 rounded-lg hover:bg-gray-50 transition-colors">Cancel</button>
-              <button onClick={handleSave} disabled={saving || !editForm.address} className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-sm font-medium py-2 rounded-lg transition-colors">
+              <Button variant="outline" onClick={cancelEdit} className="flex-1">Cancel</Button>
+              <Button onClick={handleSave} disabled={saving || !editForm.address} className="flex-1">
                 {saving ? 'Saving...' : 'Save'}
-              </button>
+              </Button>
             </div>
           </div>
         ) : (

@@ -115,9 +115,9 @@ export default function Clients() {
           <h2 className="text-xl font-semibold text-gray-900">Clients</h2>
           <p className="text-sm text-gray-500 mt-0.5">{clients.length} contacts</p>
         </div>
-        <button onClick={openCreateModal} className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+        <Button onClick={openCreateModal}>
           + New Client
-        </button>
+        </Button>
       </div>
 
       {clients.length === 0 ? (
@@ -142,12 +142,12 @@ export default function Clients() {
                   <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusStyles[client.status]}`}>
                     {client.status}
                   </span>
-                  <button onClick={() => openEditModal(client)} className="text-gray-300 hover:text-blue-600 transition-colors">
+                  <Button variant="ghost" size="icon" onClick={() => openEditModal(client)} className="text-gray-300 hover:text-blue-600">
                     <Pencil size={15} />
-                  </button>
-                  <button onClick={() => setConfirmId(client.id)} className="text-gray-300 hover:text-red-500 transition-colors">
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => setConfirmId(client.id)} className="text-gray-300 hover:text-red-500">
                     <Trash2 size={15} />
-                  </button>
+                  </Button>
                 </div>
               </div>
               <div className="space-y-2 text-sm text-gray-500">

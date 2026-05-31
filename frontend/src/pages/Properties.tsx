@@ -82,12 +82,11 @@ export default function Properties() {
           <h2 className="text-xl font-semibold text-gray-900">Properties</h2>
           <p className="text-sm text-gray-500 mt-0.5">{properties.length} listings</p>
         </div>
-        <button
+        <Button
           onClick={() => setShowModal(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
         >
           + New Property
-        </button>
+        </Button>
       </div>
 
       {properties.length === 0 ? (

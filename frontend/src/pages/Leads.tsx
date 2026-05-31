@@ -119,9 +119,9 @@ export default function Leads() {
           <h2 className="text-xl font-semibold text-gray-900">Leads</h2>
           <p className="text-sm text-gray-500 mt-0.5">{leads.length} total leads</p>
         </div>
-        <button onClick={openCreateModal} className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+        <Button onClick={openCreateModal}>
           + New Lead
-        </button>
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -141,12 +141,12 @@ export default function Leads() {
                     <div className="flex items-start justify-between mb-2">
                       <p className="font-medium text-gray-900 text-sm">{lead.name}</p>
                       <div className="flex items-center gap-2 ml-2">
-                        <button onClick={() => openEditModal(lead)} className="text-gray-300 hover:text-blue-600 transition-colors">
+                        <Button variant="ghost" size="icon" onClick={() => openEditModal(lead)} className="text-gray-300 hover:text-blue-600">
                           <Pencil size={13} />
-                        </button>
-                        <button onClick={() => setConfirmId(lead.id)} className="text-gray-300 hover:text-red-500 transition-colors">
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => setConfirmId(lead.id)} className="text-gray-300 hover:text-red-500">
                           <Trash2 size={13} />
-                        </button>
+                        </Button>
                       </div>
                     </div>
                     <div className="space-y-1.5 text-xs text-gray-500">

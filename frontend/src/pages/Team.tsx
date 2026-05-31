@@ -3,6 +3,7 @@ import { Mail, Shield, Trash2, UserRound, X } from 'lucide-react';
 import { useAuth } from '../auth/useAuth';
 import { supabase } from '../lib/supabase';
 import ConfirmModal from '../components/ConfirmModal';
+import { Button } from '@/components/ui/button';
 
 const roleStyles = {
   owner: 'bg-blue-100 text-blue-700',
@@ -157,16 +158,15 @@ export default function Team() {
           <h2 className="text-xl font-semibold text-gray-900">Team</h2>
           <p className="text-sm text-gray-500 mt-0.5">{activeTeam?.name ?? 'Current workspace'}</p>
         </div>
-        <button
+        <Button
           onClick={() => {
             setError(null);
             setInviteUrl('');
             setShowModal(true);
           }}
-          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
         >
           Invite Member
-        </button>
+        </Button>
       </div>
 
       {error && !showModal && <p className="text-sm text-red-500 mb-4">Error: {error}</p>}
@@ -204,13 +204,15 @@ export default function Team() {
                   </span>
                 )}
                 {canManageMembers && !isCurrentUser && (
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => setConfirmUserId(member.user_id)}
-                    className="text-gray-300 hover:text-red-500 transition-colors"
+                    className="text-gray-300 hover:text-red-500"
                     aria-label={`Remove ${name}`}
                   >
                     <Trash2 size={15} />
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
@@ -223,9 +225,9 @@ export default function Team() {
           <div className="bg-white rounded-xl w-full max-w-md mx-4 p-6">
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-semibold text-gray-900">Invite Member</h3>
-              <button onClick={() => setShowModal(false)}>
+              <Button variant="ghost" size="icon" onClick={() => setShowModal(false)}>
                 <X size={18} className="text-gray-400 hover:text-gray-600" />
-              </button>
+              </Button>
             </div>
 
             <form onSubmit={handleInvite} className="space-y-4">
@@ -270,20 +272,21 @@ export default function Team() {
               )}
 
               <div className="flex gap-3 pt-1">
-                <button
+                <Button
+                  variant="outline"
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="flex-1 border border-gray-200 text-gray-600 text-sm font-medium py-2 rounded-lg hover:bg-gray-50"
+                  className="flex-1"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
                   disabled={saving || !form.email.trim()}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-sm font-medium py-2 rounded-lg"
+                  className="flex-1"
                 >
                   {saving ? 'Creating...' : 'Create Invite'}
-                </button>
+                </Button>
               </div>
             </form>
           </div>
