@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const statusStyles = {
   Active:   'bg-green-100 text-green-700',
@@ -181,17 +182,27 @@ export default function Clients() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                  <select name="type" value={form.type} onChange={handleChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option>Buyer</option>
-                    <option>Seller</option>
-                  </select>
+                  <Select value={form.type} onValueChange={(value) => setForm({ ...form, type: value })}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Buyer">Buyer</SelectItem>
+                      <SelectItem value="Seller">Seller</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                  <select name="status" value={form.status} onChange={handleChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option>Active</option>
-                    <option>Inactive</option>
-                  </select>
+                  <Select value={form.status} onValueChange={(value) => setForm({ ...form, status: value })}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Active">Active</SelectItem>
+                      <SelectItem value="Inactive">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>

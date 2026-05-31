@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 import ConfirmModal from '../components/ConfirmModal';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const roleStyles = {
   owner: 'bg-blue-100 text-blue-700',
@@ -252,15 +253,15 @@ export default function Team() {
                 <span className="text-gray-700 font-medium">Role</span>
                 <div className="relative mt-1">
                   <Shield size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <select
-                    name="role"
-                    value={form.role}
-                    onChange={handleChange}
-                    className="w-full border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="member">Member</option>
-                    <option value="admin">Admin</option>
-                  </select>
+                  <Select value={form.role} onValueChange={(value) => setForm({ ...form, role: value })}>
+                    <SelectTrigger className="w-full pl-9">
+                      <SelectValue placeholder="Select role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="member">Member</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </label>
 

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const statusStyles = {
   New:       'bg-blue-100 text-blue-700',
@@ -195,11 +196,16 @@ export default function Leads() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                <select name="status" value={form.status} onChange={handleChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option>New</option>
-                  <option>Contacted</option>
-                  <option>Closed</option>
-                </select>
+                <Select value={form.status} onValueChange={(value) => setForm({ ...form, status: value })}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="New">New</SelectItem>
+                    <SelectItem value="Contacted">Contacted</SelectItem>
+                    <SelectItem value="Closed">Closed</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className="flex gap-3 mt-5">

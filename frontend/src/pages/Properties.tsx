@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const statusStyles = {
   active:  'bg-green-100 text-green-700',
@@ -136,11 +137,16 @@ export default function Properties() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                <select name="status" value={form.status} onChange={handleChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option value="active">Active</option>
-                  <option value="pending">Pending</option>
-                  <option value="sold">Sold</option>
-                </select>
+                <Select value={form.status} onValueChange={(value) => setForm({ ...form, status: value })}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="sold">Sold</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Bedrooms</label>

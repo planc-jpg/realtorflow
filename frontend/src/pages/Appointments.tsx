@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const typeStyles = {
   Showing:      'bg-blue-100 text-blue-700',
@@ -222,12 +223,17 @@ export default function Appointments() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                <select name="type" value={form.type} onChange={handleChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option>Showing</option>
-                  <option>Consultation</option>
-                  <option>Closing</option>
-                  <option>Follow Up</option>
-                </select>
+                <Select value={form.type} onValueChange={(value) => setForm({ ...form, type: value })}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Showing">Showing</SelectItem>
+                    <SelectItem value="Consultation">Consultation</SelectItem>
+                    <SelectItem value="Closing">Closing</SelectItem>
+                    <SelectItem value="Follow Up">Follow Up</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className="flex gap-3 mt-5">
