@@ -3,8 +3,11 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../auth/useAuth';
-import { Mail, Phone, Pencil, X, Trash2 } from 'lucide-react';
+import { Mail, Phone, Pencil, Trash2 } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 
 const statusStyles = {
   Active:   'bg-green-100 text-green-700',
@@ -156,25 +159,23 @@ export default function Clients() {
         </div>
       )}
 
-      {showModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl w-full max-w-md mx-4 p-6">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="font-semibold text-gray-900">{editingItem ? 'Edit Client' : 'New Client'}</h3>
-              <button onClick={closeModal}><X size={18} className="text-gray-400 hover:text-gray-600" /></button>
-            </div>
+      <Dialog open={showModal} onOpenChange={(open) => { if (!open) closeModal(); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingItem ? 'Edit Client' : 'New Client'}</DialogTitle>
+          </DialogHeader>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
-                <input name="name" value={form.name} onChange={handleChange} placeholder="Sarah Johnson" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <Input name="name" value={form.name} onChange={handleChange} placeholder="Sarah Johnson" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input name="email" value={form.email} onChange={handleChange} placeholder="sarah@email.com" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <Input name="email" value={form.email} onChange={handleChange} placeholder="sarah@email.com" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                <input name="phone" value={form.phone} onChange={handleChange} placeholder="(512) 555-0101" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <Input name="phone" value={form.phone} onChange={handleChange} placeholder="(512) 555-0101" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -194,14 +195,13 @@ export default function Clients() {
               </div>
             </div>
             <div className="flex gap-3 mt-5">
-              <button onClick={closeModal} className="flex-1 border border-gray-200 text-gray-600 text-sm font-medium py-2 rounded-lg hover:bg-gray-50">Cancel</button>
-              <button onClick={handleSave} disabled={saving || !form.name} className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-sm font-medium py-2 rounded-lg">
+              <Button variant="outline" onClick={closeModal} className="flex-1">Cancel</Button>
+              <Button onClick={handleSave} disabled={saving || !form.name} className="flex-1">
                 {saving ? 'Saving...' : editingItem ? 'Save Changes' : 'Save Client'}
-              </button>
+              </Button>
             </div>
-          </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {confirmId && (
         <ConfirmModal

@@ -3,8 +3,11 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../auth/useAuth';
-import { MapPin, Pencil, User, X, Trash2 } from 'lucide-react';
+import { MapPin, Pencil, User, Trash2 } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 
 const typeStyles = {
   Showing:      'bg-blue-100 text-blue-700',
@@ -178,17 +181,15 @@ export default function Appointments() {
         </div>
       )}
 
-      {showModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl w-full max-w-md mx-4 p-6">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="font-semibold text-gray-900">{editingItem ? 'Edit Appointment' : 'New Appointment'}</h3>
-              <button onClick={closeModal}><X size={18} className="text-gray-400 hover:text-gray-600" /></button>
-            </div>
+      <Dialog open={showModal} onOpenChange={(open) => { if (!open) closeModal(); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingItem ? 'Edit Appointment' : 'New Appointment'}</DialogTitle>
+          </DialogHeader>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
-                <input name="title" value={form.title} onChange={handleChange} placeholder="Property Showing" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <Input name="title" value={form.title} onChange={handleChange} placeholder="Property Showing" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Client</label>
@@ -211,11 +212,11 @@ export default function Appointments() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                  <input name="date" value={form.date} onChange={handleChange} placeholder="Mon, May 19" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  <Input name="date" value={form.date} onChange={handleChange} placeholder="Mon, May 19" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
-                  <input name="time" value={form.time} onChange={handleChange} placeholder="10:00 AM" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  <Input name="time" value={form.time} onChange={handleChange} placeholder="10:00 AM" />
                 </div>
               </div>
               <div>
@@ -229,14 +230,13 @@ export default function Appointments() {
               </div>
             </div>
             <div className="flex gap-3 mt-5">
-              <button onClick={closeModal} className="flex-1 border border-gray-200 text-gray-600 text-sm font-medium py-2 rounded-lg hover:bg-gray-50">Cancel</button>
-              <button onClick={handleSave} disabled={saving || !form.title} className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-sm font-medium py-2 rounded-lg">
+              <Button variant="outline" onClick={closeModal} className="flex-1">Cancel</Button>
+              <Button onClick={handleSave} disabled={saving || !form.title} className="flex-1">
                 {saving ? 'Saving...' : editingItem ? 'Save Changes' : 'Save Appointment'}
-              </button>
+              </Button>
             </div>
-          </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {confirmId && (
         <ConfirmModal

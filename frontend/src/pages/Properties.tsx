@@ -4,7 +4,10 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../auth/useAuth';
-import { Home, X } from 'lucide-react';
+import { Home } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 
 const statusStyles = {
   active:  'bg-green-100 text-green-700',
@@ -117,23 +120,19 @@ export default function Properties() {
         </div>
       )}
 
-      {showModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-lg mx-4 p-6">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="font-semibold text-gray-900">New Property</h3>
-              <button onClick={() => setShowModal(false)}>
-                <X size={18} className="text-gray-400 hover:text-gray-600" />
-              </button>
-            </div>
+      <Dialog open={showModal} onOpenChange={(open) => { if (!open) setShowModal(false); }}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>New Property</DialogTitle>
+          </DialogHeader>
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Address *</label>
-                <input name="address" value={form.address} onChange={handleChange} placeholder="123 Maple Street, Austin, TX" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <Input name="address" value={form.address} onChange={handleChange} placeholder="123 Maple Street, Austin, TX" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Price</label>
-                <input name="price" value={form.price} onChange={handleChange} placeholder="450000" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <Input name="price" value={form.price} onChange={handleChange} placeholder="450000" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
@@ -145,26 +144,25 @@ export default function Properties() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Bedrooms</label>
-                <input name="beds" value={form.beds} onChange={handleChange} placeholder="3" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <Input name="beds" value={form.beds} onChange={handleChange} placeholder="3" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Bathrooms</label>
-                <input name="baths" value={form.baths} onChange={handleChange} placeholder="2" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <Input name="baths" value={form.baths} onChange={handleChange} placeholder="2" />
               </div>
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Square Footage</label>
-                <input name="sqft" value={form.sqft} onChange={handleChange} placeholder="2100" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <Input name="sqft" value={form.sqft} onChange={handleChange} placeholder="2100" />
               </div>
             </div>
             <div className="flex gap-3 mt-5">
-              <button onClick={() => setShowModal(false)} className="flex-1 border border-gray-200 text-gray-600 text-sm font-medium py-2 rounded-lg hover:bg-gray-50 transition-colors">Cancel</button>
-              <button onClick={handleSave} disabled={saving || !form.address} className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-sm font-medium py-2 rounded-lg transition-colors">
+              <Button variant="outline" onClick={() => setShowModal(false)} className="flex-1">Cancel</Button>
+              <Button onClick={handleSave} disabled={saving || !form.address} className="flex-1">
                 {saving ? 'Saving...' : 'Save Property'}
-              </button>
+              </Button>
             </div>
-          </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
