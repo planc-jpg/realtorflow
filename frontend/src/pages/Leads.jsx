@@ -33,7 +33,7 @@ export default function Leads() {
     const [leadsResult, propertiesResult] = await Promise.all([
       supabase
         .from('leads')
-        .select('*')
+        .select('*, property:properties(id, address)')
         .eq('team_id', activeTeamId)
         .order('created_at', { ascending: false }),
       supabase
@@ -115,7 +115,7 @@ export default function Leads() {
                       </button>
                     </div>
                     <div className="space-y-1.5 text-xs text-gray-500">
-                      {lead.property && <div className="flex items-center gap-1.5"><Home size={12} /><span>{lead.property}</span></div>}
+                      {lead.property?.address && <div className="flex items-center gap-1.5"><Home size={12} /><span>{lead.property.address}</span></div>}
                       {lead.email && <div className="flex items-center gap-1.5"><Mail size={12} /><span>{lead.email}</span></div>}
                       {lead.phone && <div className="flex items-center gap-1.5"><Phone size={12} /><span>{lead.phone}</span></div>}
                     </div>

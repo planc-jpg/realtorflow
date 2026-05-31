@@ -34,7 +34,7 @@ export default function Appointments() {
     const [appointmentsResult, propertiesResult, clientsResult] = await Promise.all([
       supabase
         .from('appointments')
-        .select('*')
+        .select('*, property:properties(id, address), client:clients(id, name)')
         .eq('team_id', activeTeamId)
         .order('date', { ascending: true }),
       supabase
@@ -130,8 +130,8 @@ export default function Appointments() {
                           </span>
                         </div>
                         <div className="flex items-center gap-4 text-xs text-gray-500">
-                          {appt.client && <span className="flex items-center gap-1"><User size={11} />{appt.client}</span>}
-                          {appt.property && <span className="flex items-center gap-1"><MapPin size={11} />{appt.property}</span>}
+                          {appt.client?.name && <span className="flex items-center gap-1"><User size={11} />{appt.client.name}</span>}
+                          {appt.property?.address && <span className="flex items-center gap-1"><MapPin size={11} />{appt.property.address}</span>}
                         </div>
                       </div>
                       <button onClick={() => setConfirmId(appt.id)} className="text-gray-300 hover:text-red-500 transition-colors flex-shrink-0">
