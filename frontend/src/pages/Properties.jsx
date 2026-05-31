@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../auth/useAuth';
 import { Home, X } from 'lucide-react';
-import ConfirmModal from '../components/ConfirmModal';
 
 const statusStyles = {
   active:  'bg-green-100 text-green-700',
@@ -30,7 +29,6 @@ export default function Properties() {
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
-  const [confirmId, setConfirmId] = useState(null);
 
   useEffect(() => {
     fetchProperties();
@@ -69,13 +67,6 @@ export default function Properties() {
     if (error) alert('Error saving property: ' + error.message);
     else { setShowModal(false); setForm(emptyForm); fetchProperties(); }
     setSaving(false);
-  }
-
-  async function handleDelete() {
-    const { error } = await supabase.from('properties').delete().eq('id', confirmId);
-    if (error) alert('Error: ' + error.message);
-    else fetchProperties();
-    setConfirmId(null);
   }
 
   if (loading) return <p className="text-sm text-gray-500">Loading properties...</p>;
@@ -173,14 +164,6 @@ export default function Properties() {
             </div>
           </div>
         </div>
-      )}
-
-      {confirmId && (
-        <ConfirmModal
-          message="This property will be permanently deleted."
-          onConfirm={handleDelete}
-          onCancel={() => setConfirmId(null)}
-        />
       )}
     </div>
   );
