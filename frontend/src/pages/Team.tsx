@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Mail, Plus, Shield, Trash2, UserRound, X } from 'lucide-react';
+import { Mail, Pencil, Plus, Shield, Trash2, UserRound, X } from 'lucide-react';
 import { useAuth } from '../auth/useAuth';
 import { supabase } from '../lib/supabase';
 import ConfirmModal from '../components/ConfirmModal';
@@ -25,7 +25,7 @@ function formatDate(value) {
 }
 
 export default function Team() {
-  const { activeTeamId, activeTeam, user } = useAuth();
+  const { activeTeamId, activeTeam, user, refreshTeams } = useAuth();
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -35,9 +35,13 @@ export default function Team() {
   const [inviteUrl, setInviteUrl] = useState('');
   const [confirmUserId, setConfirmUserId] = useState(null);
   const [updatingUserId, setUpdatingUserId] = useState(null);
+  const [editingTeamName, setEditingTeamName] = useState(false);
+  const [teamNameDraft, setTeamNameDraft] = useState('');
+  const [savingTeamName, setSavingTeamName] = useState(false);
 
   const currentMember = members.find((member) => member.user_id === user?.id);
   const canManageMembers = currentMember?.role === 'owner' || currentMember?.role === 'admin';
+  const canEditTeamName = currentMember?.role === 'owner';
 
   const fetchMembers = useCallback(async () => {
     if (!activeTeamId) return;
@@ -151,14 +155,91 @@ export default function Team() {
     setConfirmUserId(null);
   }
 
+  function startEditingTeamName() {
+    setError(null);
+    setTeamNameDraft(activeTeam?.name ?? '');
+    setEditingTeamName(true);
+  }
+
+  function cancelEditingTeamName() {
+    setTeamNameDraft('');
+    setEditingTeamName(false);
+  }
+
+  async function handleSaveTeamName() {
+    const name = teamNameDraft.trim();
+    if (!activeTeamId || !name) return;
+
+    setSavingTeamName(true);
+    setError(null);
+
+    const { error } = await supabase
+      .from('teams')
+      .update({ name })
+      .eq('id', activeTeamId);
+
+    if (error) {
+      setError(error.message);
+      setSavingTeamName(false);
+      return;
+    }
+
+    await refreshTeams();
+    setSavingTeamName(false);
+    setEditingTeamName(false);
+    setTeamNameDraft('');
+  }
+
   if (loading) return <p className="text-sm text-muted-foreground">Loading team...</p>;
 
   return (
     <div>
       <div className="rf-page-header">
         <div>
-          <h2 className="rf-page-title">Team</h2>
-          <p className="rf-page-subtitle">{activeTeam?.name ?? 'Current workspace'}</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="rf-page-title">Team</h2>
+            {editingTeamName ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <input
+                  value={teamNameDraft}
+                  onChange={(e) => setTeamNameDraft(e.target.value)}
+                  className="rf-native-input w-56"
+                  aria-label="Team name"
+                />
+                <Button
+                  size="sm"
+                  onClick={handleSaveTeamName}
+                  disabled={savingTeamName || !teamNameDraft.trim()}
+                >
+                  {savingTeamName ? 'Saving...' : 'Save'}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={cancelEditingTeamName}
+                  disabled={savingTeamName}
+                >
+                  Cancel
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5">
+                <p className="text-sm font-medium text-muted-foreground">{activeTeam?.name ?? 'Current workspace'}</p>
+                {canEditTeamName && (
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={startEditingTeamName}
+                    className="rf-icon-button-muted"
+                    aria-label="Edit team name"
+                  >
+                    <Pencil size={14} />
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+          <p className="rf-page-subtitle">Manage members, roles, and invites.</p>
         </div>
         <Button
           onClick={() => {
