@@ -13,11 +13,13 @@ const typeStyles = {
   'Follow Up':  'bg-amber-100 text-amber-700',
 };
 
-const emptyForm = { title: '', client: '', property: '', date: '', time: '', type: 'Showing' };
+const emptyForm = { title: '', client_id: '', property_id: '', date: '', time: '', type: 'Showing' };
 
 export default function Appointments() {
   const { activeTeamId } = useAuth();
   const [appointments, setAppointments] = useState([]);
+  const [properties, setProperties] = useState([]);
+  const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -29,13 +31,33 @@ export default function Appointments() {
 
   async function fetchAppointments() {
     if (!activeTeamId) return;
-    const { data, error } = await supabase
-      .from('appointments')
-      .select('*')
-      .eq('team_id', activeTeamId)
-      .order('date', { ascending: true });
-    if (error) setError(error.message);
-    else setAppointments(data);
+    const [appointmentsResult, propertiesResult, clientsResult] = await Promise.all([
+      supabase
+        .from('appointments')
+        .select('*')
+        .eq('team_id', activeTeamId)
+        .order('date', { ascending: true }),
+      supabase
+        .from('properties')
+        .select('id, address')
+        .eq('team_id', activeTeamId)
+        .order('address'),
+      supabase
+        .from('clients')
+        .select('id, name')
+        .eq('team_id', activeTeamId)
+        .order('name'),
+    ]);
+
+    if (appointmentsResult.error) setError(appointmentsResult.error.message);
+    else setAppointments(appointmentsResult.data);
+
+    if (propertiesResult.error) setError(propertiesResult.error.message);
+    else setProperties(propertiesResult.data ?? []);
+
+    if (clientsResult.error) setError(clientsResult.error.message);
+    else setClients(clientsResult.data ?? []);
+
     setLoading(false);
   }
 
@@ -46,7 +68,15 @@ export default function Appointments() {
   async function handleSave() {
     if (!form.title || !activeTeamId) return;
     setSaving(true);
-    const { error } = await supabase.from('appointments').insert([{ ...form, team_id: activeTeamId }]);
+    const { error } = await supabase.from('appointments').insert([{
+      title: form.title,
+      date: form.date,
+      time: form.time,
+      type: form.type,
+      client_id: form.client_id || null,
+      property_id: form.property_id || null,
+      team_id: activeTeamId,
+    }]);
     if (error) alert('Error: ' + error.message);
     else { setShowModal(false); setForm(emptyForm); fetchAppointments(); }
     setSaving(false);
@@ -129,11 +159,21 @@ export default function Appointments() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Client</label>
-                <input name="client" value={form.client} onChange={handleChange} placeholder="Sarah Johnson" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <select name="client_id" value={form.client_id} onChange={handleChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="" disabled>{clients.length === 0 ? 'No clients yet' : 'Select a client'}</option>
+                  {clients.map((client) => (
+                    <option key={client.id} value={client.id}>{client.name}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Property</label>
-                <input name="property" value={form.property} onChange={handleChange} placeholder="123 Maple Street" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <select name="property_id" value={form.property_id} onChange={handleChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="" disabled>{properties.length === 0 ? 'No properties yet' : 'Select a property'}</option>
+                  {properties.map((property) => (
+                    <option key={property.id} value={property.id}>{property.address}</option>
+                  ))}
+                </select>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>

@@ -13,11 +13,12 @@ const statusStyles = {
 };
 
 const columns = ['New', 'Contacted', 'Closed'];
-const emptyForm = { name: '', email: '', phone: '', property: '', status: 'New' };
+const emptyForm = { name: '', email: '', phone: '', property_id: '', status: 'New' };
 
 export default function Leads() {
   const { activeTeamId } = useAuth();
   const [leads, setLeads] = useState([]);
+  const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -29,13 +30,25 @@ export default function Leads() {
 
   async function fetchLeads() {
     if (!activeTeamId) return;
-    const { data, error } = await supabase
-      .from('leads')
-      .select('*')
-      .eq('team_id', activeTeamId)
-      .order('created_at', { ascending: false });
-    if (error) setError(error.message);
-    else setLeads(data);
+    const [leadsResult, propertiesResult] = await Promise.all([
+      supabase
+        .from('leads')
+        .select('*')
+        .eq('team_id', activeTeamId)
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('properties')
+        .select('id, address')
+        .eq('team_id', activeTeamId)
+        .order('address'),
+    ]);
+
+    if (leadsResult.error) setError(leadsResult.error.message);
+    else setLeads(leadsResult.data);
+
+    if (propertiesResult.error) setError(propertiesResult.error.message);
+    else setProperties(propertiesResult.data ?? []);
+
     setLoading(false);
   }
 
@@ -46,7 +59,14 @@ export default function Leads() {
   async function handleSave() {
     if (!form.name || !activeTeamId) return;
     setSaving(true);
-    const { error } = await supabase.from('leads').insert([{ ...form, team_id: activeTeamId }]);
+    const { error } = await supabase.from('leads').insert([{
+      name: form.name,
+      email: form.email,
+      phone: form.phone,
+      status: form.status,
+      property_id: form.property_id || null,
+      team_id: activeTeamId,
+    }]);
     if (error) alert('Error: ' + error.message);
     else { setShowModal(false); setForm(emptyForm); fetchLeads(); }
     setSaving(false);
@@ -132,7 +152,12 @@ export default function Leads() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Property</label>
-                <input name="property" value={form.property} onChange={handleChange} placeholder="123 Maple Street" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <select name="property_id" value={form.property_id} onChange={handleChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="" disabled>{properties.length === 0 ? 'No properties yet' : 'Select a property'}</option>
+                  {properties.map((property) => (
+                    <option key={property.id} value={property.id}>{property.address}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
