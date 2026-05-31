@@ -70,6 +70,12 @@ export default function Login() {
           />
         </label>
 
+        <div className="-mt-2 text-right">
+          <Link to="/forgot-password" className="text-sm font-medium text-foreground hover:underline">
+            Forgot password?
+          </Link>
+        </div>
+
         {error && (
           <p className="text-sm text-destructive">{error}</p>
         )}

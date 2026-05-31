@@ -14,11 +14,15 @@ const navItems = [
   { label: 'Team',         icon: Settings,        to: '/team' },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ open = false, onClose = () => {} }) {
   const { user, teams, activeTeamId, activeTeam, setActiveTeam, signOut } = useAuth();
 
   return (
-    <aside className="w-60 shrink-0 border-r border-sidebar-border bg-sidebar text-sidebar-foreground flex flex-col">
+    <aside
+      className={`fixed inset-y-0 left-0 z-50 flex w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-transform duration-200 ease-out lg:static lg:z-auto lg:translate-x-0 ${
+        open ? 'translate-x-0' : '-translate-x-full'
+      }`}
+    >
       <div className="px-5 py-5 border-b border-sidebar-border">
         <h1 className="text-[15px] font-semibold tracking-tight text-foreground">RealtorFlow</h1>
         <p className="text-xs text-muted-foreground mt-1">Operations dashboard</p>
@@ -51,6 +55,7 @@ export default function Sidebar() {
             key={to}
             to={to}
             end
+            onClick={onClose}
             className={({ isActive }) =>
               `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                 isActive
