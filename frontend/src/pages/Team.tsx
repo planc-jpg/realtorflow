@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Mail, Shield, Trash2, UserRound, X } from 'lucide-react';
+import { Mail, Plus, Shield, Trash2, UserRound, X } from 'lucide-react';
 import { useAuth } from '../auth/useAuth';
 import { supabase } from '../lib/supabase';
 import ConfirmModal from '../components/ConfirmModal';
@@ -8,9 +8,9 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const roleStyles = {
-  owner: 'bg-blue-100 text-blue-700',
-  admin: 'bg-purple-100 text-purple-700',
-  member: 'bg-gray-100 text-gray-600',
+  owner: 'border-sky-200 bg-sky-50 text-sky-700',
+  admin: 'border-violet-200 bg-violet-50 text-violet-700',
+  member: 'border-border bg-muted text-muted-foreground',
 };
 
 const emptyForm = { email: '', role: 'member' };
@@ -151,14 +151,14 @@ export default function Team() {
     setConfirmUserId(null);
   }
 
-  if (loading) return <p className="text-sm text-gray-500">Loading team...</p>;
+  if (loading) return <p className="text-sm text-muted-foreground">Loading team...</p>;
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="rf-page-header">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900">Team</h2>
-          <p className="text-sm text-gray-500 mt-0.5">{activeTeam?.name ?? 'Current workspace'}</p>
+          <h2 className="rf-page-title">Team</h2>
+          <p className="rf-page-subtitle">{activeTeam?.name ?? 'Current workspace'}</p>
         </div>
         <Button
           onClick={() => {
@@ -166,26 +166,28 @@ export default function Team() {
             setInviteUrl('');
             setShowModal(true);
           }}
+          className="gap-1.5"
         >
+          <Plus size={16} />
           Invite Member
         </Button>
       </div>
 
-      {error && !showModal && <p className="text-sm text-red-500 mb-4">Error: {error}</p>}
+      {error && !showModal && <p className="text-sm text-destructive mb-4">Error: {error}</p>}
 
-      <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
+      <div className="rf-card divide-y divide-border">
         {members.map((member) => {
           const name = member.profile?.full_name || (member.user_id === user?.id ? user.email : member.user_id);
           const isCurrentUser = member.user_id === user?.id;
           return (
             <div key={member.user_id} className="flex items-center justify-between gap-4 p-4">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+                <div className="w-9 h-9 rounded-full bg-sky-50 text-sky-700 flex items-center justify-center flex-shrink-0">
                   <UserRound size={17} />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">{name}</p>
-                  <p className="text-xs text-gray-500">Joined {formatDate(member.joined_at)}</p>
+                  <p className="text-sm font-medium text-foreground truncate">{name}</p>
+                  <p className="text-xs text-muted-foreground">Joined {formatDate(member.joined_at)}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
@@ -194,7 +196,7 @@ export default function Team() {
                     value={member.role}
                     onChange={(e) => handleRoleChange(member.user_id, e.target.value)}
                     disabled={isCurrentUser || updatingUserId === member.user_id}
-                    className="rounded-lg border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-700 disabled:bg-gray-50 disabled:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="rounded-lg border border-input bg-card px-2.5 py-1 text-xs font-medium text-foreground disabled:bg-muted disabled:text-muted-foreground focus:outline-none focus:ring-3 focus:ring-ring/20"
                   >
                     <option value="member">member</option>
                     <option value="admin">admin</option>
@@ -210,7 +212,7 @@ export default function Team() {
                     variant="ghost"
                     size="icon"
                     onClick={() => setConfirmUserId(member.user_id)}
-                    className="text-gray-300 hover:text-red-500"
+                    className="rf-icon-button-danger"
                     aria-label={`Remove ${name}`}
                   >
                     <Trash2 size={15} />
@@ -224,19 +226,19 @@ export default function Team() {
 
       {showModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl w-full max-w-md mx-4 p-6">
+          <div className="rf-card w-full max-w-md mx-4 p-6 shadow-lg">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="font-semibold text-gray-900">Invite Member</h3>
+              <h3 className="font-semibold text-foreground">Invite Member</h3>
               <Button variant="ghost" size="icon" onClick={() => setShowModal(false)}>
-                <X size={18} className="text-gray-400 hover:text-gray-600" />
+                <X size={18} className="text-muted-foreground hover:text-foreground" />
               </Button>
             </div>
 
             <form onSubmit={handleInvite} className="space-y-4">
               <label className="block text-sm">
-                <span className="text-gray-700 font-medium">Email</span>
+                <span className="text-foreground font-medium">Email</span>
                 <div className="relative mt-1">
-                  <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <input
                     name="email"
                     type="email"
@@ -244,15 +246,15 @@ export default function Team() {
                     onChange={handleChange}
                     required
                     placeholder="teammate@email.com"
-                    className="w-full border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="rf-native-input pl-9"
                   />
                 </div>
               </label>
 
               <label className="block text-sm">
-                <span className="text-gray-700 font-medium">Role</span>
+                <span className="text-foreground font-medium">Role</span>
                 <div className="relative mt-1">
-                  <Shield size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <Shield size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <Select value={form.role} onValueChange={(value) => setForm({ ...form, role: value })}>
                     <SelectTrigger className="w-full pl-9">
                       <SelectValue placeholder="Select role" />
@@ -265,11 +267,11 @@ export default function Team() {
                 </div>
               </label>
 
-              {error && <p className="text-sm text-red-600">{error}</p>}
+              {error && <p className="text-sm text-destructive">{error}</p>}
               {inviteUrl && (
-                <div className="rounded-lg border border-green-100 bg-green-50 p-3">
-                  <p className="text-sm font-medium text-green-700">Invite link copied</p>
-                  <p className="mt-1 break-all text-xs text-green-700">{inviteUrl}</p>
+                <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
+                  <p className="text-sm font-medium text-emerald-700">Invite link copied</p>
+                  <p className="mt-1 break-all text-xs text-emerald-700">{inviteUrl}</p>
                 </div>
               )}
 

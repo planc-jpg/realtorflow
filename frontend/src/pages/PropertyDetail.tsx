@@ -7,9 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 const statusStyles = {
-  active: 'bg-green-100 text-green-700',
-  pending: 'bg-amber-100 text-amber-700',
-  sold: 'bg-gray-100 text-gray-500',
+  active: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+  pending: 'border-amber-200 bg-amber-50 text-amber-700',
+  sold: 'border-border bg-muted text-muted-foreground',
 };
 
 const emptyEditForm = { address: '', price: '', beds: '', baths: '', sqft: '', status: 'active' };
@@ -75,9 +75,9 @@ export default function PropertyDetail() {
     return () => window.clearTimeout(timer);
   }, [fetchPropertyDetail]);
 
-  if (loading) return <p className="text-sm text-gray-500">Loading property...</p>;
-  if (error) return <p className="text-sm text-red-500">Error: {error}</p>;
-  if (!property) return <p className="text-sm text-gray-500">Property not found.</p>;
+  if (loading) return <p className="text-sm text-muted-foreground">Loading property...</p>;
+  if (error) return <p className="text-sm text-destructive">Error: {error}</p>;
+  if (!property) return <p className="text-sm text-muted-foreground">Property not found.</p>;
 
   async function handleDelete() {
     const { error } = await supabase.from('properties').delete().eq('id', id);
@@ -126,28 +126,28 @@ export default function PropertyDetail() {
         Back to properties
       </Button>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+      <div className="rf-card p-6 mb-6">
         <div className="flex items-start justify-between gap-4 mb-5">
           <div className="flex items-start gap-3 min-w-0">
-            <div className="p-2 bg-blue-50 rounded-lg flex-shrink-0">
-              <Home size={20} className="text-blue-600" />
+            <div className="flex size-10 items-center justify-center rounded-lg bg-sky-50 text-sky-700 flex-shrink-0">
+              <Home size={20} />
             </div>
             <div className="min-w-0">
-              <h2 className="text-xl font-semibold text-gray-900">{property.address}</h2>
-              <p className="text-2xl font-semibold text-gray-900 mt-2">
+              <h2 className="rf-page-title">{property.address}</h2>
+              <p className="text-2xl font-semibold tracking-tight text-foreground mt-2">
                 {property.price ? `$${property.price.toLocaleString()}` : 'Price not set'}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            <Badge variant="outline" className={statusStyles[property.status] || 'bg-gray-100 text-gray-500'}>
+            <Badge variant="outline" className={statusStyles[property.status] || 'border-border bg-muted text-muted-foreground'}>
               {property.status}
             </Badge>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setEditMode(true)}
-              className="text-gray-300 hover:text-blue-600"
+              className="rf-icon-button-muted"
               aria-label="Edit property"
             >
               <Pencil size={16} />
@@ -156,7 +156,7 @@ export default function PropertyDetail() {
               variant="ghost"
               size="icon"
               onClick={() => setConfirmDelete(true)}
-              className="text-gray-300 hover:text-red-500"
+              className="rf-icon-button-danger"
               aria-label="Delete property"
             >
               <Trash2 size={16} />
@@ -165,35 +165,35 @@ export default function PropertyDetail() {
         </div>
 
         {editMode ? (
-          <div className="border-t border-gray-100 pt-4">
+          <div className="border-t border-border pt-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                <input name="address" value={editForm.address} onChange={handleEditChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <label className="rf-field-label">Address</label>
+                <input name="address" value={editForm.address} onChange={handleEditChange} className="rf-native-input" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Price</label>
-                <input name="price" value={editForm.price} onChange={handleEditChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <label className="rf-field-label">Price</label>
+                <input name="price" value={editForm.price} onChange={handleEditChange} className="rf-native-input" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                <select name="status" value={editForm.status} onChange={handleEditChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label className="rf-field-label">Status</label>
+                <select name="status" value={editForm.status} onChange={handleEditChange} className="rf-native-input">
                   <option value="active">Active</option>
                   <option value="pending">Pending</option>
                   <option value="sold">Sold</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Bedrooms</label>
-                <input name="beds" value={editForm.beds} onChange={handleEditChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <label className="rf-field-label">Bedrooms</label>
+                <input name="beds" value={editForm.beds} onChange={handleEditChange} className="rf-native-input" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Bathrooms</label>
-                <input name="baths" value={editForm.baths} onChange={handleEditChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <label className="rf-field-label">Bathrooms</label>
+                <input name="baths" value={editForm.baths} onChange={handleEditChange} className="rf-native-input" />
               </div>
               <div className="col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Square Footage</label>
-                <input name="sqft" value={editForm.sqft} onChange={handleEditChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <label className="rf-field-label">Square Footage</label>
+                <input name="sqft" value={editForm.sqft} onChange={handleEditChange} className="rf-native-input" />
               </div>
             </div>
             <div className="flex gap-3 mt-5">
@@ -204,7 +204,7 @@ export default function PropertyDetail() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-4 border-t border-gray-100 pt-4 text-sm text-gray-500">
+          <div className="grid grid-cols-3 gap-4 border-t border-border pt-4 text-sm text-muted-foreground">
             <span>{property.beds ?? '-'} beds</span>
             <span>{property.baths ?? '-'} baths</span>
             <span>{property.sqft ? property.sqft.toLocaleString() : '-'} sqft</span>
@@ -214,20 +214,20 @@ export default function PropertyDetail() {
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <section>
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">Leads</h3>
+          <h3 className="text-sm font-semibold text-foreground mb-3">Leads</h3>
           {leads.length === 0 ? (
-            <p className="text-sm text-gray-400">No linked leads yet.</p>
+            <div className="rf-empty-state py-8">No linked leads yet.</div>
           ) : (
             <div className="space-y-3">
               {leads.map((lead) => (
-                <div key={lead.id} className="bg-white rounded-xl border border-gray-200 p-4">
+                <div key={lead.id} className="rf-card p-4">
                   <div className="flex items-center justify-between gap-3 mb-2">
-                    <p className="text-sm font-medium text-gray-900">{lead.name}</p>
-                    <Badge variant="outline" className="bg-gray-100 text-gray-600">
+                    <p className="text-sm font-medium text-foreground">{lead.name}</p>
+                    <Badge variant="outline" className="border-border bg-muted text-muted-foreground">
                       {lead.status}
                     </Badge>
                   </div>
-                  <div className="space-y-1.5 text-xs text-gray-500">
+                  <div className="space-y-1.5 text-xs text-muted-foreground">
                     {lead.email && <div className="flex items-center gap-1.5"><Mail size={12} /><span>{lead.email}</span></div>}
                     {lead.phone && <div className="flex items-center gap-1.5"><Phone size={12} /><span>{lead.phone}</span></div>}
                   </div>
@@ -238,20 +238,20 @@ export default function PropertyDetail() {
         </section>
 
         <section>
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">Appointments</h3>
+          <h3 className="text-sm font-semibold text-foreground mb-3">Appointments</h3>
           {appointments.length === 0 ? (
-            <p className="text-sm text-gray-400">No linked appointments yet.</p>
+            <div className="rf-empty-state py-8">No linked appointments yet.</div>
           ) : (
             <div className="space-y-3">
               {appointments.map((appointment) => (
-                <div key={appointment.id} className="bg-white rounded-xl border border-gray-200 p-4">
+                <div key={appointment.id} className="rf-card p-4">
                   <div className="flex items-center justify-between gap-3 mb-2">
-                    <p className="text-sm font-medium text-gray-900">{appointment.title}</p>
-                    <Badge variant="outline" className="bg-gray-100 text-gray-600">
+                    <p className="text-sm font-medium text-foreground">{appointment.title}</p>
+                    <Badge variant="outline" className="border-border bg-muted text-muted-foreground">
                       {appointment.type}
                     </Badge>
                   </div>
-                  <div className="space-y-1.5 text-xs text-gray-500">
+                  <div className="space-y-1.5 text-xs text-muted-foreground">
                     {appointment.client?.name && <div className="flex items-center gap-1.5"><User size={12} /><span>{appointment.client.name}</span></div>}
                     {(appointment.date || appointment.time) && (
                       <div className="flex items-center gap-1.5">

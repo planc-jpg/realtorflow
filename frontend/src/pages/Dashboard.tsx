@@ -47,11 +47,13 @@ export default function Dashboard() {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-gray-900 mb-1">Dashboard</h2>
-      <p className="text-sm text-gray-500 mb-6">Welcome back. Here's your overview.</p>
+      <div className="mb-6">
+        <h2 className="rf-page-title">Dashboard</h2>
+        <p className="rf-page-subtitle">Welcome back. Here's your overview.</p>
+      </div>
 
       {loading ? (
-        <p className="text-sm text-gray-500">Loading...</p>
+        <p className="text-sm text-muted-foreground">Loading...</p>
       ) : (
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
           {stats.map((stat) => (
@@ -60,8 +62,8 @@ export default function Dashboard() {
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <p className="text-sm text-gray-400 text-center">
+      <div className="rf-card p-8">
+        <p className="text-center text-sm text-muted-foreground">
           More widgets coming soon.
         </p>
       </div>

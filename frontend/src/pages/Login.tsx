@@ -2,16 +2,18 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/useAuth';
 import { PENDING_INVITE_KEY } from '../auth/constants';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 export default function Login() {
   const { signIn } = useAuth();
-  const navigate   = useNavigate();
-  const location   = useLocation();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const [email, setEmail]       = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError]       = useState(null);
-  const [busy, setBusy]         = useState(false);
+  const [error, setError] = useState(null);
+  const [busy, setBusy] = useState(false);
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -34,55 +36,51 @@ export default function Login() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100 p-6">
+    <div className="flex min-h-screen items-center justify-center bg-background p-6">
       <form
         onSubmit={onSubmit}
-        className="w-full max-w-sm rounded-xl bg-white p-6 shadow-sm border border-gray-200 space-y-4"
+        className="rf-card w-full max-w-sm p-6 space-y-4"
       >
         <div>
-          <h1 className="text-lg font-semibold text-gray-900">Sign in to RealtorFlow</h1>
-          <p className="text-sm text-gray-500 mt-1">Use your work email and password.</p>
+          <h1 className="text-lg font-semibold tracking-tight text-foreground">Sign in to RealtorFlow</h1>
+          <p className="text-sm text-muted-foreground mt-1">Use your work email and password.</p>
         </div>
 
         <label className="block text-sm">
-          <span className="text-gray-700">Email</span>
-          <input
+          <span className="text-foreground">Email</span>
+          <Input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
             autoComplete="email"
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="mt-1"
           />
         </label>
 
         <label className="block text-sm">
-          <span className="text-gray-700">Password</span>
-          <input
+          <span className="text-foreground">Password</span>
+          <Input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
             autoComplete="current-password"
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="mt-1"
           />
         </label>
 
         {error && (
-          <p className="text-sm text-red-600">{error}</p>
+          <p className="text-sm text-destructive">{error}</p>
         )}
 
-        <button
-          type="submit"
-          disabled={busy}
-          className="w-full rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:bg-blue-300"
-        >
-          {busy ? 'Signing in…' : 'Sign in'}
-        </button>
+        <Button type="submit" disabled={busy} className="w-full">
+          {busy ? 'Signing in...' : 'Sign in'}
+        </Button>
 
-        <p className="text-center text-sm text-gray-500">
+        <p className="text-center text-sm text-muted-foreground">
           Need an account?{' '}
-          <Link to="/signup" className="text-blue-600 hover:underline">
+          <Link to="/signup" className="font-medium text-foreground hover:underline">
             Sign up
           </Link>
         </p>

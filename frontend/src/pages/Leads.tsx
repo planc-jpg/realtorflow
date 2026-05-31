@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../auth/useAuth';
-import { Mail, Phone, Home, Pencil, Trash2 } from 'lucide-react';
+import { Mail, Phone, Home, Pencil, Plus, Trash2 } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,9 +12,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const statusStyles = {
-  New:       'bg-blue-100 text-blue-700',
-  Contacted: 'bg-amber-100 text-amber-700',
-  Closed:    'bg-green-100 text-green-700',
+  New:       'border-sky-200 bg-sky-50 text-sky-700',
+  Contacted: 'border-amber-200 bg-amber-50 text-amber-700',
+  Closed:    'border-emerald-200 bg-emerald-50 text-emerald-700',
 };
 
 const columns = ['New', 'Contacted', 'Closed'];
@@ -111,18 +111,19 @@ export default function Leads() {
     setConfirmId(null);
   }
 
-  if (loading) return <p className="text-sm text-gray-500">Loading leads...</p>;
-  if (error) return <p className="text-sm text-red-500">Error: {error}</p>;
+  if (loading) return <p className="text-sm text-muted-foreground">Loading leads...</p>;
+  if (error) return <p className="text-sm text-destructive">Error: {error}</p>;
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="rf-page-header">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900">Leads</h2>
-          <p className="text-sm text-gray-500 mt-0.5">{leads.length} total leads</p>
+          <h2 className="rf-page-title">Leads</h2>
+          <p className="rf-page-subtitle">{leads.length} total leads</p>
         </div>
-        <Button onClick={openCreateModal}>
-          + New Lead
+        <Button onClick={openCreateModal} className="gap-1.5">
+          <Plus size={16} />
+          New Lead
         </Button>
       </div>
 
@@ -130,28 +131,28 @@ export default function Leads() {
         {columns.map((col) => {
           const colLeads = leads.filter((l) => l.status === col);
           return (
-            <div key={col} className="bg-white rounded-xl border border-gray-200 p-4">
+            <div key={col} className="rf-card p-4">
               <div className="flex items-center justify-between mb-4">
                 <Badge variant="outline" className={statusStyles[col]}>
                   {col}
                 </Badge>
-                <span className="text-sm text-gray-400 font-medium">{colLeads.length}</span>
+                <span className="text-sm font-medium text-muted-foreground">{colLeads.length}</span>
               </div>
               <div className="space-y-3">
                 {colLeads.map((lead) => (
-                  <div key={lead.id} className="bg-gray-50 rounded-lg border border-gray-100 p-3">
+                  <div key={lead.id} className="rounded-lg border border-border bg-muted/35 p-3">
                     <div className="flex items-start justify-between mb-2">
-                      <p className="font-medium text-gray-900 text-sm">{lead.name}</p>
+                      <p className="font-medium text-foreground text-sm">{lead.name}</p>
                       <div className="flex items-center gap-2 ml-2">
-                        <Button variant="ghost" size="icon" onClick={() => openEditModal(lead)} className="text-gray-300 hover:text-blue-600">
+                        <Button variant="ghost" size="icon" onClick={() => openEditModal(lead)} className="rf-icon-button-muted">
                           <Pencil size={13} />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => setConfirmId(lead.id)} className="text-gray-300 hover:text-red-500">
+                        <Button variant="ghost" size="icon" onClick={() => setConfirmId(lead.id)} className="rf-icon-button-danger">
                           <Trash2 size={13} />
                         </Button>
                       </div>
                     </div>
-                    <div className="space-y-1.5 text-xs text-gray-500">
+                    <div className="space-y-1.5 text-xs text-muted-foreground">
                       {lead.property?.address && <div className="flex items-center gap-1.5"><Home size={12} /><span>{lead.property.address}</span></div>}
                       {lead.email && <div className="flex items-center gap-1.5"><Mail size={12} /><span>{lead.email}</span></div>}
                       {lead.phone && <div className="flex items-center gap-1.5"><Phone size={12} /><span>{lead.phone}</span></div>}
@@ -159,7 +160,7 @@ export default function Leads() {
                   </div>
                 ))}
                 {colLeads.length === 0 && (
-                  <p className="text-xs text-gray-400 text-center py-4">No leads here</p>
+                  <p className="rounded-lg border border-dashed border-border py-4 text-center text-xs text-muted-foreground">No leads here</p>
                 )}
               </div>
             </div>
@@ -174,20 +175,20 @@ export default function Leads() {
           </DialogHeader>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+                <label className="rf-field-label">Name *</label>
                 <Input name="name" value={form.name} onChange={handleChange} placeholder="Carlos Mendez" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label className="rf-field-label">Email</label>
                 <Input name="email" value={form.email} onChange={handleChange} placeholder="carlos@email.com" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                <label className="rf-field-label">Phone</label>
                 <Input name="phone" value={form.phone} onChange={handleChange} placeholder="(512) 555-0121" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Property</label>
-                <select name="property_id" value={form.property_id} onChange={handleChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label className="rf-field-label">Property</label>
+                <select name="property_id" value={form.property_id} onChange={handleChange} className="rf-native-input">
                   <option value="" disabled>{properties.length === 0 ? 'No properties yet' : 'Select a property'}</option>
                   {properties.map((property) => (
                     <option key={property.id} value={property.id}>{property.address}</option>
@@ -195,7 +196,7 @@ export default function Leads() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <label className="rf-field-label">Status</label>
                 <Select value={form.status} onValueChange={(value) => setForm({ ...form, status: value })}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select status" />

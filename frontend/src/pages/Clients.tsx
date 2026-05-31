@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../auth/useAuth';
-import { Mail, Phone, Pencil, Trash2 } from 'lucide-react';
+import { Mail, Phone, Pencil, Plus, Trash2 } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,18 +12,18 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const statusStyles = {
-  Active:   'bg-green-100 text-green-700',
-  Inactive: 'bg-gray-100 text-gray-500',
+  Active:   'border-emerald-200 bg-emerald-50 text-emerald-700',
+  Inactive: 'border-border bg-muted text-muted-foreground',
 };
 
 const typeStyles = {
-  Buyer:  'bg-blue-50 text-blue-600',
-  Seller: 'bg-purple-50 text-purple-600',
+  Buyer:  'border-sky-200 bg-sky-50 text-sky-700',
+  Seller: 'border-violet-200 bg-violet-50 text-violet-700',
 };
 
 const avatarColors = [
-  'bg-blue-100 text-blue-700',
-  'bg-purple-100 text-purple-700',
+  'bg-sky-100 text-sky-700',
+  'bg-violet-100 text-violet-700',
   'bg-amber-100 text-amber-700',
   'bg-green-100 text-green-700',
   'bg-pink-100 text-pink-700',
@@ -107,34 +107,35 @@ export default function Clients() {
     setConfirmId(null);
   }
 
-  if (loading) return <p className="text-sm text-gray-500">Loading clients...</p>;
-  if (error) return <p className="text-sm text-red-500">Error: {error}</p>;
+  if (loading) return <p className="text-sm text-muted-foreground">Loading clients...</p>;
+  if (error) return <p className="text-sm text-destructive">Error: {error}</p>;
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="rf-page-header">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900">Clients</h2>
-          <p className="text-sm text-gray-500 mt-0.5">{clients.length} contacts</p>
+          <h2 className="rf-page-title">Clients</h2>
+          <p className="rf-page-subtitle">{clients.length} contacts</p>
         </div>
-        <Button onClick={openCreateModal}>
-          + New Client
+        <Button onClick={openCreateModal} className="gap-1.5">
+          <Plus size={16} />
+          New Client
         </Button>
       </div>
 
       {clients.length === 0 ? (
-        <p className="text-sm text-gray-400">No clients yet.</p>
+        <div className="rf-empty-state">No clients yet.</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {clients.map((client, index) => (
-            <div key={client.id} className="bg-white rounded-xl border border-gray-200 p-5">
+            <div key={client.id} className="rf-card p-5">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold ${avatarColors[index % avatarColors.length]}`}>
                     {getInitials(client.name)}
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">{client.name}</p>
+                    <p className="font-medium text-foreground">{client.name}</p>
                     <Badge variant="outline" className={typeStyles[client.type]}>
                       {client.type}
                     </Badge>
@@ -144,15 +145,15 @@ export default function Clients() {
                   <Badge variant="outline" className={statusStyles[client.status]}>
                     {client.status}
                   </Badge>
-                  <Button variant="ghost" size="icon" onClick={() => openEditModal(client)} className="text-gray-300 hover:text-blue-600">
+                  <Button variant="ghost" size="icon" onClick={() => openEditModal(client)} className="rf-icon-button-muted">
                     <Pencil size={15} />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={() => setConfirmId(client.id)} className="text-gray-300 hover:text-red-500">
+                  <Button variant="ghost" size="icon" onClick={() => setConfirmId(client.id)} className="rf-icon-button-danger">
                     <Trash2 size={15} />
                   </Button>
                 </div>
               </div>
-              <div className="space-y-2 text-sm text-gray-500">
+              <div className="space-y-2 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2"><Mail size={14} /><span>{client.email}</span></div>
                 <div className="flex items-center gap-2"><Phone size={14} /><span>{client.phone}</span></div>
               </div>
@@ -168,20 +169,20 @@ export default function Clients() {
           </DialogHeader>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+                <label className="rf-field-label">Name *</label>
                 <Input name="name" value={form.name} onChange={handleChange} placeholder="Sarah Johnson" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label className="rf-field-label">Email</label>
                 <Input name="email" value={form.email} onChange={handleChange} placeholder="sarah@email.com" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                <label className="rf-field-label">Phone</label>
                 <Input name="phone" value={form.phone} onChange={handleChange} placeholder="(512) 555-0101" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                  <label className="rf-field-label">Type</label>
                   <Select value={form.type} onValueChange={(value) => setForm({ ...form, type: value })}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select type" />
@@ -193,7 +194,7 @@ export default function Clients() {
                   </Select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                  <label className="rf-field-label">Status</label>
                   <Select value={form.status} onValueChange={(value) => setForm({ ...form, status: value })}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select status" />

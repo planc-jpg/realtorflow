@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../auth/useAuth';
-import { Home } from 'lucide-react';
+import { Home, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -12,9 +12,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const statusStyles = {
-  active:  'bg-green-100 text-green-700',
-  pending: 'bg-amber-100 text-amber-700',
-  sold:    'bg-gray-100 text-gray-500',
+  active:  'border-emerald-200 bg-emerald-50 text-emerald-700',
+  pending: 'border-amber-200 bg-amber-50 text-amber-700',
+  sold:    'border-border bg-muted text-muted-foreground',
 };
 
 const emptyForm = {
@@ -74,44 +74,46 @@ export default function Properties() {
     setSaving(false);
   }
 
-  if (loading) return <p className="text-sm text-gray-500">Loading properties...</p>;
-  if (error) return <p className="text-sm text-red-500">Error: {error}</p>;
+  if (loading) return <p className="text-sm text-muted-foreground">Loading properties...</p>;
+  if (error) return <p className="text-sm text-destructive">Error: {error}</p>;
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="rf-page-header">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900">Properties</h2>
-          <p className="text-sm text-gray-500 mt-0.5">{properties.length} listings</p>
+          <h2 className="rf-page-title">Properties</h2>
+          <p className="rf-page-subtitle">{properties.length} listings</p>
         </div>
         <Button
           onClick={() => setShowModal(true)}
+          className="gap-1.5"
         >
-          + New Property
+          <Plus size={16} />
+          New Property
         </Button>
       </div>
 
       {properties.length === 0 ? (
-        <p className="text-sm text-gray-400">No properties found.</p>
+        <div className="rf-empty-state">No properties found.</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {properties.map((p) => (
-            <Link key={p.id} to={`/properties/${p.id}`} className="block bg-white rounded-xl border border-gray-200 p-5 hover:border-blue-200 hover:shadow-sm transition">
+            <Link key={p.id} to={`/properties/${p.id}`} className="rf-card block p-5 transition hover:border-ring/30 hover:shadow-sm">
               <div className="flex items-start justify-between mb-3">
-                <div className="p-2 bg-blue-50 rounded-lg">
-                  <Home size={18} className="text-blue-600" />
+                <div className="flex size-9 items-center justify-center rounded-lg bg-sky-50 text-sky-700">
+                  <Home size={18} />
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className={statusStyles[p.status] || 'bg-gray-100 text-gray-500'}>
+                  <Badge variant="outline" className={statusStyles[p.status] || 'border-border bg-muted text-muted-foreground'}>
                     {p.status}
                   </Badge>
                 </div>
               </div>
-              <h3 className="font-medium text-gray-900 mb-1">{p.address}</h3>
-              <p className="text-lg font-semibold text-gray-900 mb-3">
+              <h3 className="font-medium text-foreground mb-1">{p.address}</h3>
+              <p className="text-lg font-semibold tracking-tight text-foreground mb-3">
                 ${p.price?.toLocaleString()}
               </p>
-              <div className="flex items-center gap-4 text-sm text-gray-500 border-t border-gray-100 pt-3">
+              <div className="flex items-center gap-4 border-t border-border pt-3 text-sm text-muted-foreground">
                 <span>{p.beds} beds</span>
                 <span>{p.baths} baths</span>
                 {p.sqft && <span>{p.sqft?.toLocaleString()} sqft</span>}
@@ -128,15 +130,15 @@ export default function Properties() {
           </DialogHeader>
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Address *</label>
+                <label className="rf-field-label">Address *</label>
                 <Input name="address" value={form.address} onChange={handleChange} placeholder="123 Maple Street, Austin, TX" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Price</label>
+                <label className="rf-field-label">Price</label>
                 <Input name="price" value={form.price} onChange={handleChange} placeholder="450000" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <label className="rf-field-label">Status</label>
                 <Select value={form.status} onValueChange={(value) => setForm({ ...form, status: value })}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select status" />
@@ -149,15 +151,15 @@ export default function Properties() {
                 </Select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Bedrooms</label>
+                <label className="rf-field-label">Bedrooms</label>
                 <Input name="beds" value={form.beds} onChange={handleChange} placeholder="3" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Bathrooms</label>
+                <label className="rf-field-label">Bathrooms</label>
                 <Input name="baths" value={form.baths} onChange={handleChange} placeholder="2" />
               </div>
               <div className="col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Square Footage</label>
+                <label className="rf-field-label">Square Footage</label>
                 <Input name="sqft" value={form.sqft} onChange={handleChange} placeholder="2100" />
               </div>
             </div>

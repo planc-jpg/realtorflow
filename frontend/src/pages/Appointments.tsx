@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../auth/useAuth';
-import { MapPin, Pencil, User, Trash2 } from 'lucide-react';
+import { MapPin, Pencil, Plus, User, Trash2 } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,10 +12,10 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const typeStyles = {
-  Showing:      'bg-blue-100 text-blue-700',
-  Consultation: 'bg-purple-100 text-purple-700',
-  Closing:      'bg-green-100 text-green-700',
-  'Follow Up':  'bg-amber-100 text-amber-700',
+  Showing:      'border-sky-200 bg-sky-50 text-sky-700',
+  Consultation: 'border-violet-200 bg-violet-50 text-violet-700',
+  Closing:      'border-emerald-200 bg-emerald-50 text-emerald-700',
+  'Follow Up':  'border-amber-200 bg-amber-50 text-amber-700',
 };
 
 const emptyForm = { title: '', client_id: '', property_id: '', date: '', time: '', type: 'Showing' };
@@ -124,54 +124,55 @@ export default function Appointments() {
 
   const days = [...new Set(appointments.map((a) => a.date))];
 
-  if (loading) return <p className="text-sm text-gray-500">Loading appointments...</p>;
-  if (error) return <p className="text-sm text-red-500">Error: {error}</p>;
+  if (loading) return <p className="text-sm text-muted-foreground">Loading appointments...</p>;
+  if (error) return <p className="text-sm text-destructive">Error: {error}</p>;
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="rf-page-header">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900">Appointments</h2>
-          <p className="text-sm text-gray-500 mt-0.5">{appointments.length} upcoming</p>
+          <h2 className="rf-page-title">Appointments</h2>
+          <p className="rf-page-subtitle">{appointments.length} upcoming</p>
         </div>
-        <Button onClick={openCreateModal}>
-          + New Appointment
+        <Button onClick={openCreateModal} className="gap-1.5">
+          <Plus size={16} />
+          New Appointment
         </Button>
       </div>
 
       {appointments.length === 0 ? (
-        <p className="text-sm text-gray-400">No appointments yet.</p>
+        <div className="rf-empty-state">No appointments yet.</div>
       ) : (
         <div className="space-y-6">
           {days.map((day) => (
             <div key={day}>
-              <h3 className="text-sm font-medium text-gray-500 mb-3">{day}</h3>
+              <h3 className="mb-3 text-sm font-medium text-muted-foreground">{day}</h3>
               <div className="space-y-3">
                 {appointments
                   .filter((a) => a.date === day)
                   .map((appt) => (
-                    <div key={appt.id} className="bg-white rounded-xl border border-gray-200 p-4 flex items-center gap-4">
+                    <div key={appt.id} className="rf-card flex items-center gap-4 p-4">
                       <div className="w-20 text-center flex-shrink-0">
-                        <p className="text-sm font-semibold text-gray-900">{appt.time}</p>
+                        <p className="text-sm font-semibold text-foreground">{appt.time}</p>
                       </div>
-                      <div className="w-px h-10 bg-gray-200 flex-shrink-0" />
+                      <div className="w-px h-10 bg-border flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <p className="font-medium text-gray-900 text-sm">{appt.title}</p>
-                          <Badge variant="outline" className={typeStyles[appt.type] || 'bg-gray-100 text-gray-500'}>
+                          <p className="font-medium text-foreground text-sm">{appt.title}</p>
+                          <Badge variant="outline" className={typeStyles[appt.type] || 'border-border bg-muted text-muted-foreground'}>
                             {appt.type}
                           </Badge>
                         </div>
-                        <div className="flex items-center gap-4 text-xs text-gray-500">
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
                           {appt.client?.name && <span className="flex items-center gap-1"><User size={11} />{appt.client.name}</span>}
                           {appt.property?.address && <span className="flex items-center gap-1"><MapPin size={11} />{appt.property.address}</span>}
                         </div>
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        <Button variant="ghost" size="icon" onClick={() => openEditModal(appt)} className="text-gray-300 hover:text-blue-600">
+                        <Button variant="ghost" size="icon" onClick={() => openEditModal(appt)} className="rf-icon-button-muted">
                           <Pencil size={15} />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => setConfirmId(appt.id)} className="text-gray-300 hover:text-red-500">
+                        <Button variant="ghost" size="icon" onClick={() => setConfirmId(appt.id)} className="rf-icon-button-danger">
                           <Trash2 size={15} />
                         </Button>
                       </div>
@@ -190,12 +191,12 @@ export default function Appointments() {
           </DialogHeader>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                <label className="rf-field-label">Title *</label>
                 <Input name="title" value={form.title} onChange={handleChange} placeholder="Property Showing" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Client</label>
-                <select name="client_id" value={form.client_id} onChange={handleChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label className="rf-field-label">Client</label>
+                <select name="client_id" value={form.client_id} onChange={handleChange} className="rf-native-input">
                   <option value="" disabled>{clients.length === 0 ? 'No clients yet' : 'Select a client'}</option>
                   {clients.map((client) => (
                     <option key={client.id} value={client.id}>{client.name}</option>
@@ -203,8 +204,8 @@ export default function Appointments() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Property</label>
-                <select name="property_id" value={form.property_id} onChange={handleChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label className="rf-field-label">Property</label>
+                <select name="property_id" value={form.property_id} onChange={handleChange} className="rf-native-input">
                   <option value="" disabled>{properties.length === 0 ? 'No properties yet' : 'Select a property'}</option>
                   {properties.map((property) => (
                     <option key={property.id} value={property.id}>{property.address}</option>
@@ -213,16 +214,16 @@ export default function Appointments() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                  <label className="rf-field-label">Date</label>
                   <Input name="date" value={form.date} onChange={handleChange} placeholder="Mon, May 19" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
+                  <label className="rf-field-label">Time</label>
                   <Input name="time" value={form.time} onChange={handleChange} placeholder="10:00 AM" />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                <label className="rf-field-label">Type</label>
                 <Select value={form.type} onValueChange={(value) => setForm({ ...form, type: value })}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select type" />

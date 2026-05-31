@@ -1,13 +1,16 @@
 // src/pages/AIListing.jsx
 
 import { useState } from 'react';
+import { Copy, Sparkles } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 function generateMockDescription(form) {
   return `Welcome to ${form.address}, a stunning ${form.beds}-bedroom, ${form.baths}-bathroom home${form.sqft ? ` spanning ${form.sqft} square feet` : ''}. This exceptional property offers the perfect blend of comfort and style, making it an ideal choice for those seeking a place to call home.
 
 ${form.features ? `The home boasts impressive features including ${form.features}, adding both value and charm to this already remarkable property.` : 'The home features thoughtful design throughout, with attention to detail evident in every room.'}
 
-Nestled in a desirable location, this property presents a rare opportunity for discerning buyers. Don't miss your chance to own this incredible home — schedule your private showing today.`;
+Nestled in a desirable location, this property presents a rare opportunity for discerning buyers. Don't miss your chance to own this incredible home - schedule your private showing today.`;
 }
 
 export default function AIListing() {
@@ -46,85 +49,79 @@ export default function AIListing() {
   return (
     <div className="max-w-3xl">
       <div className="mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">AI Listing Generator</h2>
-        <p className="text-sm text-gray-500 mt-0.5">Fill in the property details and generate a listing description.</p>
+        <h2 className="rf-page-title">AI Listing Generator</h2>
+        <p className="rf-page-subtitle">Fill in the property details and generate a listing description.</p>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-4">
+      <div className="rf-card p-6 mb-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
-            <input
+            <label className="rf-field-label">Address</label>
+            <Input
               name="address"
               value={form.address}
               onChange={handleChange}
               placeholder="123 Maple Street, Austin, TX"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Price</label>
-            <input
+            <label className="rf-field-label">Price</label>
+            <Input
               name="price"
               value={form.price}
               onChange={handleChange}
               placeholder="$450,000"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Square Footage</label>
-            <input
+            <label className="rf-field-label">Square Footage</label>
+            <Input
               name="sqft"
               value={form.sqft}
               onChange={handleChange}
               placeholder="2,100"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Bedrooms</label>
-            <input
+            <label className="rf-field-label">Bedrooms</label>
+            <Input
               name="beds"
               value={form.beds}
               onChange={handleChange}
               placeholder="3"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Bathrooms</label>
-            <input
+            <label className="rf-field-label">Bathrooms</label>
+            <Input
               name="baths"
               value={form.baths}
               onChange={handleChange}
               placeholder="2"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Special Features</label>
-            <input
+            <label className="rf-field-label">Special Features</label>
+            <Input
               name="features"
               value={form.features}
               onChange={handleChange}
               placeholder="Pool, updated kitchen, hardwood floors, large backyard..."
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Tone</label>
+            <label className="rf-field-label">Tone</label>
             <select
               name="tone"
               value={form.tone}
               onChange={handleChange}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="rf-native-input"
             >
               <option value="professional">Professional</option>
               <option value="luxury">Luxury</option>
@@ -134,27 +131,31 @@ export default function AIListing() {
           </div>
         </div>
 
-        <button
+        <Button
           onClick={handleGenerate}
           disabled={loading || !form.address || !form.beds || !form.baths}
-          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-medium py-2.5 rounded-lg text-sm transition-colors"
+          className="w-full gap-1.5"
         >
+          <Sparkles size={16} />
           {loading ? 'Generating...' : 'Generate Listing Description'}
-        </button>
+        </Button>
       </div>
 
       {result && (
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div className="rf-card p-6">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-medium text-gray-900">Generated Description</h3>
-            <button
+            <h3 className="font-medium text-foreground">Generated Description</h3>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={handleCopy}
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+              className="gap-1.5"
             >
+              <Copy size={14} />
               Copy
-            </button>
+            </Button>
           </div>
-          <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{result}</p>
+          <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{result}</p>
         </div>
       )}
     </div>
