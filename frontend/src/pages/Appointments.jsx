@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../auth/useAuth';
-import { MapPin, User, X, Trash2 } from 'lucide-react';
+import { MapPin, Pencil, User, X, Trash2 } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 
 const typeStyles = {
@@ -26,6 +26,7 @@ export default function Appointments() {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [confirmId, setConfirmId] = useState(null);
+  const [editingItem, setEditingItem] = useState(null);
 
   useEffect(() => { fetchAppointments(); }, [activeTeamId]);
 
@@ -65,20 +66,47 @@ export default function Appointments() {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
+  function openCreateModal() {
+    setEditingItem(null);
+    setForm(emptyForm);
+    setShowModal(true);
+  }
+
+  function openEditModal(appointment) {
+    setEditingItem(appointment);
+    setForm({
+      title: appointment.title ?? '',
+      client_id: appointment.client_id ?? '',
+      property_id: appointment.property_id ?? '',
+      date: appointment.date ?? '',
+      time: appointment.time ?? '',
+      type: appointment.type ?? 'Showing',
+    });
+    setShowModal(true);
+  }
+
+  function closeModal() {
+    setShowModal(false);
+    setEditingItem(null);
+    setForm(emptyForm);
+  }
+
   async function handleSave() {
     if (!form.title || !activeTeamId) return;
     setSaving(true);
-    const { error } = await supabase.from('appointments').insert([{
+    const payload = {
       title: form.title,
       date: form.date,
       time: form.time,
       type: form.type,
       client_id: form.client_id || null,
       property_id: form.property_id || null,
-      team_id: activeTeamId,
-    }]);
+    };
+    const { error } = editingItem
+      ? await supabase.from('appointments').update(payload).eq('id', editingItem.id)
+      : await supabase.from('appointments').insert([{ ...payload, team_id: activeTeamId }]);
     if (error) alert('Error: ' + error.message);
-    else { setShowModal(false); setForm(emptyForm); fetchAppointments(); }
+    else { closeModal(); fetchAppointments(); }
     setSaving(false);
   }
 
@@ -101,7 +129,7 @@ export default function Appointments() {
           <h2 className="text-xl font-semibold text-gray-900">Appointments</h2>
           <p className="text-sm text-gray-500 mt-0.5">{appointments.length} upcoming</p>
         </div>
-        <button onClick={() => setShowModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+        <button onClick={openCreateModal} className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
           + New Appointment
         </button>
       </div>
@@ -134,9 +162,14 @@ export default function Appointments() {
                           {appt.property?.address && <span className="flex items-center gap-1"><MapPin size={11} />{appt.property.address}</span>}
                         </div>
                       </div>
-                      <button onClick={() => setConfirmId(appt.id)} className="text-gray-300 hover:text-red-500 transition-colors flex-shrink-0">
-                        <Trash2 size={15} />
-                      </button>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <button onClick={() => openEditModal(appt)} className="text-gray-300 hover:text-blue-600 transition-colors">
+                          <Pencil size={15} />
+                        </button>
+                        <button onClick={() => setConfirmId(appt.id)} className="text-gray-300 hover:text-red-500 transition-colors">
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
                     </div>
                   ))}
               </div>
@@ -149,8 +182,8 @@ export default function Appointments() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl w-full max-w-md mx-4 p-6">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="font-semibold text-gray-900">New Appointment</h3>
-              <button onClick={() => setShowModal(false)}><X size={18} className="text-gray-400 hover:text-gray-600" /></button>
+              <h3 className="font-semibold text-gray-900">{editingItem ? 'Edit Appointment' : 'New Appointment'}</h3>
+              <button onClick={closeModal}><X size={18} className="text-gray-400 hover:text-gray-600" /></button>
             </div>
             <div className="space-y-4">
               <div>
@@ -196,9 +229,9 @@ export default function Appointments() {
               </div>
             </div>
             <div className="flex gap-3 mt-5">
-              <button onClick={() => setShowModal(false)} className="flex-1 border border-gray-200 text-gray-600 text-sm font-medium py-2 rounded-lg hover:bg-gray-50">Cancel</button>
+              <button onClick={closeModal} className="flex-1 border border-gray-200 text-gray-600 text-sm font-medium py-2 rounded-lg hover:bg-gray-50">Cancel</button>
               <button onClick={handleSave} disabled={saving || !form.title} className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-sm font-medium py-2 rounded-lg">
-                {saving ? 'Saving...' : 'Save Appointment'}
+                {saving ? 'Saving...' : editingItem ? 'Save Changes' : 'Save Appointment'}
               </button>
             </div>
           </div>

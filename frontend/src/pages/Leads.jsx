@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../auth/useAuth';
-import { Mail, Phone, Home, X, Trash2 } from 'lucide-react';
+import { Mail, Phone, Home, Pencil, X, Trash2 } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 
 const statusStyles = {
@@ -25,6 +25,7 @@ export default function Leads() {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [confirmId, setConfirmId] = useState(null);
+  const [editingItem, setEditingItem] = useState(null);
 
   useEffect(() => { fetchLeads(); }, [activeTeamId]);
 
@@ -56,19 +57,45 @@ export default function Leads() {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
+  function openCreateModal() {
+    setEditingItem(null);
+    setForm(emptyForm);
+    setShowModal(true);
+  }
+
+  function openEditModal(lead) {
+    setEditingItem(lead);
+    setForm({
+      name: lead.name ?? '',
+      email: lead.email ?? '',
+      phone: lead.phone ?? '',
+      property_id: lead.property_id ?? '',
+      status: lead.status ?? 'New',
+    });
+    setShowModal(true);
+  }
+
+  function closeModal() {
+    setShowModal(false);
+    setEditingItem(null);
+    setForm(emptyForm);
+  }
+
   async function handleSave() {
     if (!form.name || !activeTeamId) return;
     setSaving(true);
-    const { error } = await supabase.from('leads').insert([{
+    const payload = {
       name: form.name,
       email: form.email,
       phone: form.phone,
       status: form.status,
       property_id: form.property_id || null,
-      team_id: activeTeamId,
-    }]);
+    };
+    const { error } = editingItem
+      ? await supabase.from('leads').update(payload).eq('id', editingItem.id)
+      : await supabase.from('leads').insert([{ ...payload, team_id: activeTeamId }]);
     if (error) alert('Error: ' + error.message);
-    else { setShowModal(false); setForm(emptyForm); fetchLeads(); }
+    else { closeModal(); fetchLeads(); }
     setSaving(false);
   }
 
@@ -89,7 +116,7 @@ export default function Leads() {
           <h2 className="text-xl font-semibold text-gray-900">Leads</h2>
           <p className="text-sm text-gray-500 mt-0.5">{leads.length} total leads</p>
         </div>
-        <button onClick={() => setShowModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+        <button onClick={openCreateModal} className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
           + New Lead
         </button>
       </div>
@@ -110,9 +137,14 @@ export default function Leads() {
                   <div key={lead.id} className="bg-gray-50 rounded-lg border border-gray-100 p-3">
                     <div className="flex items-start justify-between mb-2">
                       <p className="font-medium text-gray-900 text-sm">{lead.name}</p>
-                      <button onClick={() => setConfirmId(lead.id)} className="text-gray-300 hover:text-red-500 transition-colors ml-2">
-                        <Trash2 size={13} />
-                      </button>
+                      <div className="flex items-center gap-2 ml-2">
+                        <button onClick={() => openEditModal(lead)} className="text-gray-300 hover:text-blue-600 transition-colors">
+                          <Pencil size={13} />
+                        </button>
+                        <button onClick={() => setConfirmId(lead.id)} className="text-gray-300 hover:text-red-500 transition-colors">
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
                     </div>
                     <div className="space-y-1.5 text-xs text-gray-500">
                       {lead.property?.address && <div className="flex items-center gap-1.5"><Home size={12} /><span>{lead.property.address}</span></div>}
@@ -134,8 +166,8 @@ export default function Leads() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl w-full max-w-md mx-4 p-6">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="font-semibold text-gray-900">New Lead</h3>
-              <button onClick={() => setShowModal(false)}><X size={18} className="text-gray-400 hover:text-gray-600" /></button>
+              <h3 className="font-semibold text-gray-900">{editingItem ? 'Edit Lead' : 'New Lead'}</h3>
+              <button onClick={closeModal}><X size={18} className="text-gray-400 hover:text-gray-600" /></button>
             </div>
             <div className="space-y-4">
               <div>
@@ -169,9 +201,9 @@ export default function Leads() {
               </div>
             </div>
             <div className="flex gap-3 mt-5">
-              <button onClick={() => setShowModal(false)} className="flex-1 border border-gray-200 text-gray-600 text-sm font-medium py-2 rounded-lg hover:bg-gray-50">Cancel</button>
+              <button onClick={closeModal} className="flex-1 border border-gray-200 text-gray-600 text-sm font-medium py-2 rounded-lg hover:bg-gray-50">Cancel</button>
               <button onClick={handleSave} disabled={saving || !form.name} className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-sm font-medium py-2 rounded-lg">
-                {saving ? 'Saving...' : 'Save Lead'}
+                {saving ? 'Saving...' : editingItem ? 'Save Changes' : 'Save Lead'}
               </button>
             </div>
           </div>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../auth/useAuth';
-import { Mail, Phone, X, Trash2 } from 'lucide-react';
+import { Mail, Phone, Pencil, X, Trash2 } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 
 const statusStyles = {
@@ -40,6 +40,7 @@ export default function Clients() {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [confirmId, setConfirmId] = useState(null);
+  const [editingItem, setEditingItem] = useState(null);
 
   useEffect(() => { fetchClients(); }, [activeTeamId]);
 
@@ -59,12 +60,38 @@ export default function Clients() {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
+  function openCreateModal() {
+    setEditingItem(null);
+    setForm(emptyForm);
+    setShowModal(true);
+  }
+
+  function openEditModal(client) {
+    setEditingItem(client);
+    setForm({
+      name: client.name ?? '',
+      email: client.email ?? '',
+      phone: client.phone ?? '',
+      type: client.type ?? 'Buyer',
+      status: client.status ?? 'Active',
+    });
+    setShowModal(true);
+  }
+
+  function closeModal() {
+    setShowModal(false);
+    setEditingItem(null);
+    setForm(emptyForm);
+  }
+
   async function handleSave() {
     if (!form.name || !activeTeamId) return;
     setSaving(true);
-    const { error } = await supabase.from('clients').insert([{ ...form, team_id: activeTeamId }]);
+    const { error } = editingItem
+      ? await supabase.from('clients').update(form).eq('id', editingItem.id)
+      : await supabase.from('clients').insert([{ ...form, team_id: activeTeamId }]);
     if (error) alert('Error: ' + error.message);
-    else { setShowModal(false); setForm(emptyForm); fetchClients(); }
+    else { closeModal(); fetchClients(); }
     setSaving(false);
   }
 
@@ -85,7 +112,7 @@ export default function Clients() {
           <h2 className="text-xl font-semibold text-gray-900">Clients</h2>
           <p className="text-sm text-gray-500 mt-0.5">{clients.length} contacts</p>
         </div>
-        <button onClick={() => setShowModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+        <button onClick={openCreateModal} className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
           + New Client
         </button>
       </div>
@@ -112,6 +139,9 @@ export default function Clients() {
                   <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusStyles[client.status]}`}>
                     {client.status}
                   </span>
+                  <button onClick={() => openEditModal(client)} className="text-gray-300 hover:text-blue-600 transition-colors">
+                    <Pencil size={15} />
+                  </button>
                   <button onClick={() => setConfirmId(client.id)} className="text-gray-300 hover:text-red-500 transition-colors">
                     <Trash2 size={15} />
                   </button>
@@ -130,8 +160,8 @@ export default function Clients() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl w-full max-w-md mx-4 p-6">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="font-semibold text-gray-900">New Client</h3>
-              <button onClick={() => setShowModal(false)}><X size={18} className="text-gray-400 hover:text-gray-600" /></button>
+              <h3 className="font-semibold text-gray-900">{editingItem ? 'Edit Client' : 'New Client'}</h3>
+              <button onClick={closeModal}><X size={18} className="text-gray-400 hover:text-gray-600" /></button>
             </div>
             <div className="space-y-4">
               <div>
@@ -164,9 +194,9 @@ export default function Clients() {
               </div>
             </div>
             <div className="flex gap-3 mt-5">
-              <button onClick={() => setShowModal(false)} className="flex-1 border border-gray-200 text-gray-600 text-sm font-medium py-2 rounded-lg hover:bg-gray-50">Cancel</button>
+              <button onClick={closeModal} className="flex-1 border border-gray-200 text-gray-600 text-sm font-medium py-2 rounded-lg hover:bg-gray-50">Cancel</button>
               <button onClick={handleSave} disabled={saving || !form.name} className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-sm font-medium py-2 rounded-lg">
-                {saving ? 'Saving...' : 'Save Client'}
+                {saving ? 'Saving...' : editingItem ? 'Save Changes' : 'Save Client'}
               </button>
             </div>
           </div>
